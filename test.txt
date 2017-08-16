@@ -1,0 +1,19 @@
+
+
+http POST 127.0.0.1:8000/user/ username='test' isanon='True' password='password' email='email@example.com' - creates user
+
+http POST 127.0.0.1:8000/login/ authtoken='2d6ecb31188f91b5120ddc24304bdee726db0d51' isanon='True' - logs user in 
+
+http PUT 127.0.0.1:8000/user/test/ authtoken='2d6ecb31188f91b5120ddc24304bdee726db0d51' newpassword='newpassword' password='password' - changes password
+
+http DELETE 127.0.0.1:8000/user/test/ authtoken='2d6ecb31188f91b5120ddc24304bdee726db0d51' password='password' - makes user inactive
+
+http GET http://127.0.0.1:8000/photos/12.111/12.111/{authtoken} - returns all photos within 9 closest lat lon "squares"
+
+curl -F "lat=12.111" -F "lon=12.111" -F "authtoken=authtoken" -F "caption=this is a caption" -H "Content-Type: multipart/form-data" -F "media=@/home/directory/Pictures/iceax.jpg" -X POST http://127.0.0.1:8000/photos/ - uploads photo 
+
+
+
+
+
+

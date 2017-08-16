@@ -1,0 +1,17 @@
+4/19 
+
+require either auth token issued after unique device(iphone or android) identifier is sent or username and password. this will allow anon users to delete update post comments and photos. 
+
+
+logout function # no logout view just start using a new auth token if another user wants in 
+
+photos view take auth everything
+
+comments view write post get update delete
+
+then messages, follow function 
+
+
+
+
+ 
