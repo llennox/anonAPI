@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = os.environ['KEY']
+SECRET_KEY = "in+595j37s$zo2_5hs9!hxp98qobl3gai=55b3uow$he0e&x3="
 
 CONTENT_TYPES = ['image', 'video', 'webm']
 # 2.5MB - 2621440
@@ -35,11 +35,11 @@ CONTENT_TYPES = ['image', 'video', 'webm']
 MAX_UPLOAD_SIZE = 2621440
 
 # SECURITY WARNING: don't run with debug turned on in production!
-ALLOWED_HOSTS = ['.anonshot.com']
+ALLOWED_HOSTS = []
 TEMPLATE_DEBUG = False
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
 
