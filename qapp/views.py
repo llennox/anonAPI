@@ -276,8 +276,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             return HttpResponse('authtoken is invalid', status=status.HTTP_400_BAD_REQUEST)
         photos = self.returnObjects(*args)
         serializer = PhotoSerializer(photos, many=True)
-        lat1 = self.roundGET(args[0], 3)
-        lon1 = self.roundGET(args[1], 3)
+        lat1 = self.roundGET(args[0], 5)
+        lon1 = self.roundGET(args[1], 5)
         for photo in serializer.data: # do the haversin and attach comments proly a new litt func 
             lat2 = float(photo['lat'])
             lon2 = float(photo['lon'])
@@ -340,8 +340,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         nlat = lat + 1 
         photos9 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=nlon)
         photos = list(chain(photos1, photos2, photos3, photos4, photos5, photos6, photos7, photos8, photos9))
-        lat1 = self.roundGET(args[0], 3)
-        lon1 = self.roundGET(args[1], 3)
+        lat1 = self.roundGET(args[0], 5)
+        lon1 = self.roundGET(args[1], 5)
         for photo in photos: # do the haversin and attach comments proly a new litt func 
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
@@ -465,12 +465,12 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         if var < 0:
             var = var * -1
             wasNegative = True 
-        var = math.floor(var * 10 ** 3) / 10 ** 3
+        var = math.floor(var * 10 ** 5) / 10 ** 5
         if wasNegative == True:
             var = var * -1
         request.data[fl]=var
         var = str(var)
-        if var[::-1].find('.') == 3:
+        if var[::-1].find('.') == 5:
             return request
         else:
             request.data[fl]='fail'

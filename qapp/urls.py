@@ -8,7 +8,7 @@ urlpatterns = [
 	
     url(r'^photos/$', views.PhotoViewSet.as_view(), name='photos'),
     url(r'^comments/$', views.CommentViewSet.as_view(), name='comments'),
-    url(r'^photos/(\-?\d{1,2}\.\d{3,10})/(\-?\d{1,2}\.\d{3,10})/([0-9a-z]{40}\Z)$', views.PhotoViewSet.as_view(), name='photos'),
+    url(r'^photos/(\-?\d{1,2}\.\d{5,10})/(\-?\d{1,2}\.\d{5,10})/([0-9a-z]{40}\Z)$', views.PhotoViewSet.as_view(), name='photos'),
     url(r'^user/(.+)$', views.UserViewSet.as_view(), name='user'),
     url(r'^user/$', views.UserViewSet.as_view(), name='user'),
     url(r'^userphotos/(.+)/([0-9a-z]{40}\Z)$', views.UserViewSet.as_view(), name='userphotos'),
