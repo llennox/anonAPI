@@ -7,8 +7,8 @@
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: creates account</p>
-<p>http POST http://anonshot.com/user/ username='test' isanon='True' password='password' email='email@example.com'</p>
-<p style="color:blue;">http://anonshot.com/user/</p>
+<p>http POST https://anonshot.com/user/ username='test' isanon='True' password='password' email='email@example.com'</p>
+<p style="color:blue;">https://anonshot.com/user/</p>
 <p style="color:green;">data = {'username':'test', 'password':'password', 'email':'email@example.com'}</p>
 <p>Response:</p>
 <pre>
@@ -22,12 +22,12 @@
 </div>
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: logs user in, returns authtoken</p>
-<p>http POST http://anonshot.com/login/ isanon=True authtoken=authtoken</p>
+<p>http POST https://anonshot.com/login/ isanon=True authtoken=authtoken</p>
 <pre>
 
 if isanon = False users' comments and photos will not be attached to their account
 </pre>
-<p style="color:blue;">http://anonshot.com/login/</p>
+<p style="color:blue;">https://anonshot.com/login/</p>
 <p style="color:green;">data = {'authtoken': authtoken, 'isanon':True} or data = {'username':'test', 'password':'password','isanon':False}</p>
 <p>Response:</p>
 <pre>
@@ -42,8 +42,8 @@ if isanon = False users' comments and photos will not be attached to their accou
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">PUT request: changes password</p>
-<p>http PUT http://anonshot.com/user/test newpassword="newpassword" password="password" authtoken=authtoken</p>
-<p style="color:blue;">http://anonshot.com/user/{ username }</p>
+<p>http PUT https://anonshot.com/user/test newpassword="newpassword" password="password" authtoken=authtoken</p>
+<p style="color:blue;">https://anonshot.com/user/{ username }</p>
 <p style="color:green;">data = {'newpassword':'newpassword', 'password':'password', 'authtoken': authtoken}</p>
 <p>Response:</p>
 <pre>
@@ -53,8 +53,8 @@ if isanon = False users' comments and photos will not be attached to their accou
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">DELETE request: makes user inactive</p>
-<p>http DELETE http://anonshot.com/user/test password="newpassword" authtoken=authtoken<p>
-<p style="color:blue;">http://anonshot.com/user/{ username }</p>
+<p>http DELETE https://anonshot.com/user/test password="newpassword" authtoken=authtoken<p>
+<p style="color:blue;">https://anonshot.com/user/{ username }</p>
 <p style="color:green;">data = {'password':'password', 'authtoken': authtoken}</p>
 <p>Response:</p>
 <pre>
@@ -63,9 +63,9 @@ if isanon = False users' comments and photos will not be attached to their accou
 </div>
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: uploads photo</p>
-<p>curl -F "lat=12.111" -F "lon=12.111" -F "authtoken=authtoken" -F "caption=this is a caption" -H "Content-Type: multipart/form-data" -F "media=@/home/directory/file.jpg" -X POST http://anonshot.com/photos/
+<p>curl -F "lat=12.111" -F "lon=12.111" -F "authtoken=authtoken" -F "caption=this is a caption" -H "Content-Type: multipart/form-data" -F "media=@/home/directory/file.jpg" -X POST https://anonshot.com/photos/
 </p>
-<p style="color:blue;">http://anonshot.com/photos/</p>
+<p style="color:blue;">https://anonshot.com/photos/</p>
 <p style="color:green;">data = {"lat":"12.111", "lon":"12.111", "authtoken":authtoken, "caption":"this is a caption", "media":media}</p>
 <p>Response:</p>
 <pre>
@@ -85,8 +85,8 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">GET request: returns photos, within 300~ miles, closest first, returns up to 100 photos</p>
-<p>http GET http://anonshot.com/photos/{latitude}/{longitude}/{authtoken}</p>
-<p style="color:blue;">http://anonshot.com/photos/12.111/12.111/{authtoken}</p>
+<p>http GET https://anonshot.com/photos/{latitude}/{longitude}/{authtoken}</p>
+<p style="color:blue;">https://anonshot.com/photos/12.111/12.111/{authtoken}</p>
 <p>Response:</p>
 <pre>
 ]
@@ -116,9 +116,9 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 
 
 <div style="border: 2px solid black;border-radius: 5px;">
-<p style="font-size:130%">DELETE request: returns photos, within 300~ miles, closest first, returns up to 100 photos</p>
-<p>http DELETE http://anonshot.com/photos/ uuid="photouuid" password="password" authtoken=authtoken</p>
-<p style="color:blue;">http://anonshot.com/photos/</p>
+<p style="font-size:130%">DELETE request: deletes a photo</p>
+<p>http DELETE https://anonshot.com/photos/ uuid="photouuid" password="password" authtoken=authtoken</p>
+<p style="color:blue;">https://anonshot.com/photos/</p>
 <p style="color:green;">data = {'uuid':photouuid, 'authtoken':authtoken, 'password':'password'}</p>
 <p>Response:</p>
 <pre>
@@ -127,8 +127,8 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 </div>
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: posts comment</p>
-<p>http POST http://anonshot.com/comments/ photouuid='photouuid' authtoken='authtoken' comment='comment'</p>
-<p style="color:blue;">http://anonshot.com/comments/</p>
+<p>http POST https://anonshot.com/comments/ photouuid='photouuid' authtoken='authtoken' comment='comment'</p>
+<p style="color:blue;">https://anonshot.com/comments/</p>
 <p style="color:green;">data = {'photouuid':photouuid, 'authtoken':authtoken, 'comment':'comment'}</p>
 <p>Response:</p>
 <pre>
@@ -147,8 +147,8 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">PUT request: edits comment</p>
-<p>http PUT http://anonshot.com/comments/ photouuid=photouuid commentuuid=commentuuid comment='edited comment' authtoken=authtoken</p>
-<p style="color:blue;">http://anonshot.com/comments/</p>
+<p>http PUT https://anonshot.com/comments/ photouuid=photouuid commentuuid=commentuuid comment='edited comment' authtoken=authtoken</p>
+<p style="color:blue;">https://anonshot.com/comments/</p>
 <p style="color:green;">data = {'photouuid':photouuid, 'authtoken':authtoken,'commentuuid':commentuuid, 'comment':'edited comment'}</p>
 <p>Response:</p>
 <pre>
@@ -157,8 +157,8 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 </div>
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">DELETE request: deletes comment</p>
-<p>http DELETE http://anonshot.com/comments/ uuid="commentuuid" password="password" authtoken=authtoken</p>
-<p style="color:blue;">http://anonshot.com/comments/</p>
+<p>http DELETE https://anonshot.com/comments/ uuid="commentuuid" password="password" authtoken=authtoken</p>
+<p style="color:blue;">https://anonshot.com/comments/</p>
 <p style="color:green;">data = {'uuid':commentuuid, 'authtoken':authtoken, 'password':'password'}</p>
 <p>Response:</p>
 <pre>
@@ -168,8 +168,8 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">GET request: returns user photos</p>
-<p>http GET http://anonshot.com/userphotos/{username}/{authtoken}</p>
-<p style="color:blue;">http://anonshot.com/user/{username}/{authtoken}</p>
+<p>http GET https://anonshot.com/userphotos/{username}/{authtoken}</p>
+<p style="color:blue;">https://anonshot.com/user/{username}/{authtoken}</p>
 <p>Response:</p>
 <pre>
 ]
@@ -197,9 +197,9 @@ Note: the photo will be hosted at https://s3.amazonaws.com/anonshot/{uuid}.jpg
 </div>
 
 <div style="border: 2px solid black;border-radius: 5px;">
-<p style="font-size:130%">GET request: returns user photos</p>
-<p>http GET http://anonshot.com/{uuid}/{authtoken}</p>
-<p style="color:blue;">http://anonshot.com/{uuid}/{authtoken}</p>
+<p style="font-size:130%">GET request: returns a photo</p>
+<p>http GET https://anonshot.com/{uuid}/{authtoken}</p>
+<p style="color:blue;">https://anonshot.com/{uuid}/{authtoken}</p>
 <p>Response:</p>
 <pre>
 ]
