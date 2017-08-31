@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from itertools import chain
-from rest_framework import viewsets, permissions, status, authentication
+from rest_framework import viewsets, status, authentication
+from rest_framework.response import Response
 from qapp.models import Photo, Comments, Profile
 from django.contrib.gis.geoip2 import GeoIP2
 from django.utils import timezone
@@ -18,10 +19,17 @@ from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
 import operator
+from knox.auth import TokenAuthentication
+from knox.models import AuthToken
+from knox.settings import CONSTANTS
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.settings import api_settings
 
-bucket_name =os.environ['bucket_name']
-AWS_ACCESS_KEY_ID=os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY=os.environ['AWS_SECRET_ACCESS_KEY']
+
+
+bucket_name ="anonshot"
+AWS_ACCESS_KEY_ID="AKIAIWHBCYKMVX3LDETQ"
+AWS_SECRET_ACCESS_KEY="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"
 
 
 def api_documentation(request):  ### popup that presents rules. 
@@ -30,67 +38,37 @@ def api_documentation(request):  ### popup that presents rules.
 
 
 class LILOViewSet(APIView):
- 
-    def post(self, request, *args, format=None):
-        if 'authtoken' not in request.data:
-            try:
-                username = request.data['username']
-                password = request.data['password']
-            except:
-                return HttpResponse('please send a username and password or authtoken', status=status.HTTP_400_BAD_REQUEST)
-            try:
-                user = User.objects.get(username=username)
-                print(password)
-                print(user.password)
-                if user.check_password(password) == True:
-                    user.is_active = True
-                    user.save()
-                    profile = Profile.objects.get(user=user)
-                    profile.isanon = request.data['isanon']
-                    profile.save()
-                    user = authenticate(username=username, password=password)
-                    login(request, user)
-                    data = {}
-                    data['message'] = 'user is now logged in'
-                    data['username'] = user.username
-                    data['authtoken'] = user.auth_token.key
-                    return Response(data, status=status.HTTP_202_ACCEPTED)
-                else:
-                    return HttpResponse('the password or username you entered was incorrect', status=status.HTTP_400_BAD_REQUEST)
-            except User.DoesNotExist:
-                return HttpResponse('that user does not exist', status=status.HTTP_400_BAD_REQUEST)
+    #authentication_classes = (TokenAuthentication,)
+   # permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, format=None):# refreshes token changes isanon
+        username = request.data['username']
+        password = request.data['password']
+        user = User.objects.get(username=username)
+        if user.check_password(password) == True:
+            user.is_active = True
+            user.save()
+            profile = Profile.objects.get(user=user)
+            profile.isanon = request.data['isanon']
+            profile.save()
+            user = authenticate(username=username, password=password)
+            login(request, user)  
+            user.auth_token_set.all().delete()
+            token = AuthToken.objects.create(user)  
+            #data = {}
+            #data['message'] = 'user is now logged in'
+            #data['username'] = user.username
+            #data['token'] = token
+            return Response({
+                'user': user.username,
+                'token': token,
+             }, status=status.HTTP_202_ACCEPTED)
         else:
-            try:
-                user = User.objects.get(auth_token=request.data['authtoken'])
-            except:
+            return HttpResponse('wrong username or password', status=status.HTTP_400_BAD_REQUEST)
 
-                return HttpResponse('please send a username and password or authtoken', status=status.HTTP_400_BAD_REQUEST)
-            if user is not None:
-                data = {}
-                if user.is_active:
-                    print("User is valid, active and authenticated")
-                    login(request, user)
-                    profile = Profile.objects.get(user=user)
-                    profile.isanon = request.data['isanon']
-                    profile.save()
-                    data['message'] = 'user is now logged in'
-                    data['username'] = user.username
-                    data['authtoken'] = user.auth_token.key
-                    return Response(data, status=status.HTTP_202_ACCEPTED)
-                else:
-                    user.is_active = True
-                    user.save()
-                    profile = Profile.objects.get(user=user)
-                    profile.isanon = request.data['isanon']
-                    profile.save()
-                    data['message'] = 'user is now logged in and active'
-                    data['username'] = user.username
-                    data['authtoken'] = user.auth_token.key
-                    return Response(data, status=status.HTTP_202_ACCEPTED)
-                return HttpResponse('user is inactive', status=status.HTTP_400_BAD_REQUEST)
-            return HttpResponse('that user does not exist', status=status.HTTP_400_BAD_REQUEST)
+    
 
-    def get(self, request, *args, format=None): # this might work doesn't really matter 
+    def get(self, request, *args, format=None): # this doesn't work. doesn't really matter cause we can delete key on the phone side 
         photos = PhotoViewSet()
         user = photos.auth(args[0])
         if user.is_authenticated() == True:
@@ -101,10 +79,8 @@ class LILOViewSet(APIView):
             return HttpResponse('user is already logged out', status=status.HTTP_400_BAD_REQUEST)
 
     
-        
-
-  
-class UserViewSet(APIView):  # need to make a
+class AccountCreation(APIView):
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES    
 
     def post(self, request, *args, format=None): # user creation return token and log in 
         serializer = UserSerializer(data=request.data)
@@ -113,23 +89,30 @@ class UserViewSet(APIView):  # need to make a
             user = User.objects.get(username=serializer.data['username'])
             user.set_password(serializer.data['password'])
             user.save()
+            
             try:
                 profile = Profile.objects.create(user=user, isanon=request.data['isanon'])
                 profile.save()
             except:
                 profile = Profile.objects.create(user=user, isanon=True)
                 profile.save()
-            token = Token.objects.get(user=user)
+
+            token = AuthToken.objects.create(user)
             data = serializer.data
-            data['authtoken'] = token.key
+            data['token'] = token
             data['password']= 'XXXXXXXXXX'
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+class UserViewSet(APIView):  # need to make a
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    #def post change user name I guess 
+    
 
     def put(self, request, *args, format=None):# change password or username make this more secure in the future
-        auth = PhotoViewSet()
-        user = auth.auth(request.data['authtoken'])
-        print(args[0])
+        user = request._auth.user
         if args[0] == user.username and user.check_password(request.data['password']) == True:
             user.set_password(request.data['newpassword'])
             user.save()
@@ -138,8 +121,8 @@ class UserViewSet(APIView):  # need to make a
             return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, format=None):
-        auth = PhotoViewSet()
-        user = auth.auth(request.data['authtoken'])
+        
+        user = request._auth.user
         if args[0] == user.username and user.check_password(request.data['password']) == True:
             user.is_active = False
             user.save()
@@ -148,8 +131,8 @@ class UserViewSet(APIView):  # need to make a
             return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
  
     def get(self, request, *args, format=None): # if arg is uuid return photo if arg is username return users photos
-        auth = PhotoViewSet()
-        user = auth.auth(args[1]) 
+
+        user = request._auth.user 
         profile = Profile.objects.get(user=user)
         if user.username == args[0]:
             photos = Photo.objects.filter(useruuid=profile.uuid)
@@ -190,11 +173,13 @@ class UserViewSet(APIView):  # need to make a
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
 
 class CommentViewSet(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, format=None):
-        auth = PhotoViewSet()
+        user = request._auth.user
         try:
-            user = auth.auth(request.data['authtoken'])
+            user = request.user
             profile = Profile.objects.get(user=user)
         except:
             return Response("user not found", status=status.HTTP_400_BAD_REQUEST)
@@ -212,8 +197,7 @@ class CommentViewSet(APIView):
 
 
     def delete(self, request, format=None): 
-        auth = PhotoViewSet()
-        user = auth.auth(request.data['authtoken'])
+        user = request._auth.user
         profile = Profile.objects.get(user=user)
         try:
             comment = Comments.objects.get(uuid=request.data['uuid'])
@@ -226,8 +210,7 @@ class CommentViewSet(APIView):
             return Response("failure to delete comment", status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, format=None):
-        auth = PhotoViewSet()
-        user = auth.auth(request.data['authtoken'])
+        user = request._auth.user
         profile = Profile.objects.get(user=user)
         comment = Comments.objects.get(uuid=request.data['commentuuid'])
         if comment.useruuid == profile.uuid:
@@ -240,19 +223,6 @@ class CommentViewSet(APIView):
 
 class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
 
-    def auth(self, authtoken):
-        try:
-            user = User.objects.get(auth_token=authtoken)
-        except User.DoesNotExist:
-            return Response("authtoken is not valid", status=status.HTTP_400_BAD_REQUEST)
-        if user.is_authenticated():
-            return user
-        elif user.exists() == False:
-            return HttpResponse('user does not exist', status=status.HTTP_400_BAD_REQUEST)
-        elif user.is_authenticated() == False:
-            return HttpResponse('you must log in first', status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return HttpResponse('user does not exist or authtoken is incorrect', status=status.HTTP_400_BAD_REQUEST)
 
     def clean_content(self, form):
         content = form.cleaned_data['photo']
@@ -270,10 +240,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         # first query database find gps data closest to users then retrieve the 60 most similar going up and down
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
     
-        try:
-            user = self.auth(args[2])
-        except:
-            return HttpResponse('authtoken is invalid', status=status.HTTP_400_BAD_REQUEST)
+        user = request._auth.user
         photos = self.returnObjects(*args)
         serializer = PhotoSerializer(photos, many=True)
         lat1 = self.roundGET(args[0], 5)
@@ -365,7 +332,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 
 
     def post(self, request, format=None):#save photo to amazon save url, uuid, lat, long, timestamp, visible IO, poster uuid
-        user = self.auth(request.data['authtoken'])
+        user = request._auth.user
         profile = Profile.objects.get(user=user)
         request.data['useruuid'] = str(profile.uuid)
         if profile.isanon == True:
@@ -397,7 +364,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request): # make sure user owns photo delete comments too
-        user = self.auth(request.data['authtoken'])
+        user = request._auth.user
         profile = Profile.objects.get(user=user)
         try:
             photo = Photo.objects.get(uuid=request.data['uuid'])
