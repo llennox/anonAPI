@@ -24,17 +24,122 @@ from knox.models import AuthToken
 from knox.settings import CONSTANTS
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
-
+import uuid
 
 
 bucket_name ="anonshot"
-AWS_ACCESS_KEY_ID="AKIAIWHBCYKMVX3LDETQ"
-AWS_SECRET_ACCESS_KEY="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"
+AWS_ACCESS_KEY_ID="AKIAJ27Z4MRCX3KSY6YQ"
+AWS_SECRET_ACCESS_KEY="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"
 
 
 def api_documentation(request):  ### popup that presents rules. 
     
     return render(request, 'api_docs.html') 
+
+
+
+class ChangeUsername(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None): # this is for creating an account from anon or changing, password, username or email
+        user = request._auth.user
+        try:
+            newusername = request.data['newusername']
+        except:
+            newusername = None
+        try:
+            newpassword = request.data['newpassword']
+        except:
+            newpassword = None
+        try: 
+            newemail = request.data['newemail']
+        except:
+            newemail = None
+        try:
+            password = request.data['password']
+        except:
+            password = ''
+        if newusername != None and newemail != None and newpassword != None:
+            user.username = newusername
+            user.email = newemail
+            profile = Profile.objects.get(user=user)
+            profile.profile_created = True
+            if User.objects.filter(email=newemail).exists():
+                return Response("that email is already in use", status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(newpassword)
+            user.save()
+            profile.save()
+            return Response("success", status=status.HTTP_201_CREATED)
+        elif newusername != None:
+            if User.objects.filter(username=newusername).exclude(username=user.username).exists():
+                return Response("that username is taken", status=status.HTTP_400_BAD_REQUEST)
+            user.username = newusername
+            user.save()
+            return Response("username changed", status=status.HTTP_201_CREATED)
+        elif newemail != None:
+            if User.objects.filter(email=newemail).exists():
+                return Response("that email is taken", status=status.HTTP_400_BAD_REQUEST)
+            user.email = newemail
+            return Response("email changed", status=status.HTTP_201_CREATED)
+        elif newpassword != None:
+            user.set_password(newpassword)
+            return Response("pass changed", status=status.HTTP_201_CREATED)
+        else:
+            return Response("failed", status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePassword(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, format=None): # send an email write a get this is password/username recovery
+        user = request._auth.user  
+
+        if request.data['email'] == user.email:
+            print('######SSSSSSSEEEEND AN EMAIL') 
+            return Response("comment updated", status=status.HTTP_201_CREATED)
+        return Response("comment updated", status=status.HTTP_400_BAD_REQUEST)
+
+class AccountCreation(APIView):
+    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES    
+   
+    def post(self, request, format=None): # user creation return token and log in 
+
+        if request.data['isanon'] == 'True':
+           uu = uuid.uuid4()
+           user = User.objects.create_user(str(uu), 'anonemail@anonshot.com',  str(uu))
+           
+           user.save()
+           profile = Profile.objects.create(user=user, isanon=True)
+           token = AuthToken.objects.create(user)
+           serializer = UserSerializer()
+           data = serializer.data
+           data['username'] = uu
+           data['token'] = token
+           data['password']= uu
+           return Response(data, status=status.HTTP_201_CREATED)
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
+            user.set_password(serializer.data['password'])
+            user.save()
+            
+            try:
+                profile = Profile.objects.create(user=user, isanon=request.data['isanon'], profile_created=True)
+                profile.save()
+            except:
+                profile = Profile.objects.create(user=user, isanon=True, profile_created=True)
+                profile.save()
+
+            token = AuthToken.objects.create(user)
+            data = serializer.data
+            data['email']=request.data['email']
+            data['username'] = serializer.data['username']
+            data['token'] = token
+            data['password']= 'XXXXXXXXXX'
+            return Response(data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LILOViewSet(APIView):
@@ -62,6 +167,7 @@ class LILOViewSet(APIView):
             return Response({
                 'user': user.username,
                 'token': token,
+                'profile_created' : profile.profile_created
              }, status=status.HTTP_202_ACCEPTED)
         else:
             return HttpResponse('wrong username or password', status=status.HTTP_400_BAD_REQUEST)
@@ -79,38 +185,13 @@ class LILOViewSet(APIView):
             return HttpResponse('user is already logged out', status=status.HTTP_400_BAD_REQUEST)
 
     
-class AccountCreation(APIView):
-    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES    
 
-    def post(self, request, *args, format=None): # user creation return token and log in 
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid(): 
-            serializer.save()
-            user = User.objects.get(username=serializer.data['username'])
-            user.set_password(serializer.data['password'])
-            user.save()
-            
-            try:
-                profile = Profile.objects.create(user=user, isanon=request.data['isanon'])
-                profile.save()
-            except:
-                profile = Profile.objects.create(user=user, isanon=True)
-                profile.save()
-
-            token = AuthToken.objects.create(user)
-            data = serializer.data
-            data['token'] = token
-            data['password']= 'XXXXXXXXXX'
-            return Response(data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
 class UserViewSet(APIView):  # need to make a
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    #def post change user name I guess 
     
-
     def put(self, request, *args, format=None):# change password or username make this more secure in the future
         user = request._auth.user
         if args[0] == user.username and user.check_password(request.data['password']) == True:
@@ -222,18 +303,8 @@ class CommentViewSet(APIView):
         
 
 class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
-
-
-    def clean_content(self, form):
-        content = form.cleaned_data['photo']
-        content_type = content.content_type.split('/')[0]
-        #print(content_type)
-        if content_type in settings.CONTENT_TYPES:
-            if content._size > settings.MAX_UPLOAD_SIZE:
-                return False
-        else:
-            return False
-        return content
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
     def get(self, request, *args, format=None):# return 60~ photos close to current gps give photos a points value I guess, return comments
@@ -319,17 +390,6 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         # and so on and so forth 
 
 
-    def roundGET(self, var, n):
-        wasNegative = False 
-        var = float(var)
-        if var < 0:
-            var = var * -1
-            wasNegative = True 
-        var = math.floor(var * 10 ** n) / 10 ** n
-        if wasNegative == True:
-            var = var * -1
-        return var
-
 
     def post(self, request, format=None):#save photo to amazon save url, uuid, lat, long, timestamp, visible IO, poster uuid
         user = request._auth.user
@@ -343,6 +403,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         self.roundgps('lon' ,request)
         self.roundgps('lat' ,request)
         serializer = PhotoSerializer(data=request.data)
+        print(serializer.initial_data)
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
             serializer.save()
             uuid = serializer.data['uuid']
@@ -378,6 +439,28 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         except Photo.DoesNotExist:
             return Response("failure to delete photo from server", status=status.HTTP_400_BAD_REQUEST)
 
+    def clean_content(self, form):
+        content = form.cleaned_data['photo']
+        content_type = content.content_type.split('/')[0]
+        #print(content_type)
+        if content_type in settings.CONTENT_TYPES:
+            if content._size > settings.MAX_UPLOAD_SIZE:
+                return False
+        else:
+            return False
+        return content
+
+    def roundGET(self, var, n):
+        wasNegative = False 
+        var = float(var)
+        if var < 0:
+            var = var * -1
+            wasNegative = True 
+        var = math.floor(var * 10 ** n) / 10 ** n
+        if wasNegative == True:
+            var = var * -1
+        return var
+
             
   
     def delete_picture_from_s3(self,uuid):  # check auth to delete photo 
@@ -403,9 +486,12 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 
 
     def push_picture_to_s3(self,uuid):
-        try:
+        try: 
+            return
             conn = boto.connect_s3(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+            
             bucket = conn.get_bucket(bucket_name)
+            
     # go through each version of the file
             key = '%s.jpg' % uuid
             fn = '%s.jpg' % uuid

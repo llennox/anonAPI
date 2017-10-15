@@ -1,15 +1,42 @@
 4/19 
 
-require either auth token issued after unique device(iphone or android) identifier is sent or username and password. this will allow anon users to delete update post comments and photos. 
+#write tests ~!!!! do this first fuckface
+
+# new profile field (boolean) to dictate if username chosen yet!!  ✔
+
+#change user name function # tests done ✔
+
+#change password function # tests done ✔
+
+#recover change password
+
+#change algorithm that returns photos to a combo of closest/newest/most_commented
+
+#make a flag function, three flags send me an email 
+
+#resize images
+
+#new boolean to say if user has chosen nickname yet. ✔
+
+#messages
+
+#follow function
+
+#search users function
 
 
-logout function # no logout view just start using a new auth token if another user wants in 
+#change size limit to 5 mb
 
-photos view take auth everything
+#resize images
 
-comments view write post get update delete
+#fix documentation page 
 
-then messages, follow function 
+#change user email
+
+#messages
+
+
+ 
 
 
 

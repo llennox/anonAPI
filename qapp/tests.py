@@ -12,14 +12,13 @@ class AccountTests(APITestCase):
 
     def test_create_account(self):
         url = reverse('accountcreation')
-        data = {'username':'test', 'password':'password', 'email':'email@example.com'}
+        data = {'username':'test', 'password':'password', 'email':'email@example.com', 'isanon': False}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Profile.objects.count(), 1)
         self.assertEqual(User.objects.get().username, 'test')
         return response.data['token']
 
-    
     def test_logs_user_in_username_password(self):
         self.test_create_account()
         url = reverse('login')
@@ -30,7 +29,6 @@ class AccountTests(APITestCase):
     def test_changes_user_password(self):
         authtoken = self.test_create_account()
         url = reverse('user' , args=['test'])
-
         data = {'newpassword':'newpassword', 'password':'password'}
         response = self.client.put(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken) 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
@@ -69,7 +67,6 @@ class PhotoTests(APITestCase):
         response = self.client.delete(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken)  
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
         
-
 class CommentTests(APITestCase):
       
     def test_can_post_comment(self):
@@ -112,7 +109,54 @@ class ProfileTests(APITestCase):
         url = reverse('photo', args=[uuid])
         response = self.client.get(url, format='json', HTTP_AUTHORIZATION='Token ' + authtoken) 
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)   
+
+
+class AnonProfileTests(APITestCase):
     
+    def test_user_can_bypass_account_create(self):
+        url = reverse('accountcreation')
+        data = {'username':'', 'password':'', 'email':'', 'isanon': 'True'}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        #self.assertEqual(Profile.objects.count(), 2)
+        #self.assertEqual(User.objects.get().username, 'test')
+        return response.data['token']
+
+    def test_user_can_create_username_after_creating_asanon(self):
+        authtoken = self.test_user_can_bypass_account_create()
+        url = reverse('change_username')
+        data = {'newusername':'testusername1', 'newpassword':'thisisanewpassword', 'newemail':'anewemail@example.com'}
+        response = self.client.post(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        return authtoken
+ 
+    def test_user_can_change_username(self):
+        authtoken = self.test_user_can_create_username_after_creating_asanon()
+        url = reverse('change_username')
+        data = {'newusername':'testusername1', 'password': 'thisisanewpassword'}
+        response = self.client.post(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_user_can_change_password(self):
+        authtoken = self.test_user_can_create_username_after_creating_asanon()
+        url = reverse('change_username')
+        data = {'password': 'thisisanewpassword', 'newpassword':'thisisanewpassword1'}
+        response = self.client.post(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_user_can_change_email(self):
+        authtoken = self.test_user_can_create_username_after_creating_asanon()
+        url = reverse('change_username')
+        data = {'password': 'thisisanewpassword', 'newemail':'a11newemail@example.com'}
+        response = self.client.post(url, data, format='json', HTTP_AUTHORIZATION='Token ' + authtoken)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+#messages
+#follow function
+#search users function
+#change user name function
+#make another area in Profil that dictates if username is set not or not. make username 
+
 
 
 

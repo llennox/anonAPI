@@ -49,6 +49,8 @@ class Profile(models.Model):
     profileImg = models.CharField(max_length=40, default='')
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     dateCreated = models.DateTimeField(auto_now_add=True)
+    profile_created = models.BooleanField(default=False)
+
 
 
 
