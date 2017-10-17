@@ -6,8 +6,24 @@
 <p style="font-size:130%">here's my email if you'd like to contact me gonnellcough@gmail.com</p>
 
 <div style="border: 2px solid black;border-radius: 5px;">
-<p style="font-size:130%">POST request: creates account</p>
-<p>http POST https://anonshot.com/user/ username='test' isanon='True' password='password' email='email@example.com'</p>
+<p style="font-size:130%">POST request: creates account as anon</p>
+<p>http POST https://anonshot.com/api/create-user/ username='test' isanon='True' password='password' email='email@example.com'</p>
+<p style="color:blue;">https://anonshot.com/user/</p>
+<p style="color:green;">data = {'username':'test', 'password':'password', 'email':'email@example.com'}</p>
+<p>Response:</p>
+<pre>
+{
+    "email": "", 
+    "password": "2ffbe040-403c-4783-a2a7-b641f14711eb", 
+    "token": "7cc8307cc96a5b5c383e50a05600e9e61b26afb791bc6504c76cce50cadee6fa", 
+    "username": "2ffbe040-403c-4783-a2a7-b641f14711eb"
+}
+
+</pre>
+</div>
+<div style="border: 2px solid black;border-radius: 5px;">
+<p style="font-size:130%">POST request: creates account with username</p>
+<p>http POST https://anonshot.com/api/create-user/ username='test' isanon='True' password='password' email='email@example.com'</p>
 <p style="color:blue;">https://anonshot.com/user/</p>
 <p style="color:green;">data = {'username':'test', 'password':'password', 'email':'email@example.com'}</p>
 <p>Response:</p>
@@ -15,11 +31,13 @@
 {
     "email": "email@example.com", 
     "password": "XXXXXXXXXX", 
-    "authtoken": authtoken,
-    "username": "test"
+    "token": "0fa133fcb2363eca4880bac2a434d42e7ec16b34f7e047cdfd499b5e5c96c475", 
+    "username": "testing11"
 }
 </pre>
 </div>
+
+
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: logs user in, returns authtoken</p>
 <p>http POST https://anonshot.com/login/ isanon=True authtoken=authtoken</p>

@@ -64,7 +64,7 @@ class ChangeUsername(APIView):
             user.username = newusername
             user.email = newemail
             profile = Profile.objects.get(user=user)
-            profile.profile_created = True
+            profile.created = True
             if User.objects.filter(email=newemail).exists():
                 return Response("that email is already in use", status=status.HTTP_400_BAD_REQUEST)
             user.set_password(newpassword)
@@ -126,10 +126,10 @@ class AccountCreation(APIView):
             user.save()
             
             try:
-                profile = Profile.objects.create(user=user, isanon=request.data['isanon'], profile_created=True)
+                profile = Profile.objects.create(user=user, isanon=request.data['isanon'], created=True)
                 profile.save()
             except:
-                profile = Profile.objects.create(user=user, isanon=True, profile_created=True)
+                profile = Profile.objects.create(user=user, isanon=True, created=True)
                 profile.save()
 
             token = AuthToken.objects.create(user)
@@ -167,7 +167,7 @@ class LILOViewSet(APIView):
             return Response({
                 'user': user.username,
                 'token': token,
-                'profile_created' : profile.profile_created
+                'created' : profile.created
              }, status=status.HTTP_202_ACCEPTED)
         else:
             return HttpResponse('wrong username or password', status=status.HTTP_400_BAD_REQUEST)
