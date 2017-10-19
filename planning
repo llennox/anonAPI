@@ -36,6 +36,12 @@
 #messages
 
 
+curl -H "Authorization: Token bcf0239811cca3b1dcd37615151caf7a367c0c1b2fa2373efd89582e1240100b" -F "lat=12.111" -F "lon=12.111" -F "caption=this is a caption" -H "Content-Type: multipart/form-data" -F "media=@/home/gene-art/sites/anonAPI/qapp/iceax.jpg" -X POST http://localhost:8000/api/photos/
+
+
+curl -H "Authorization: Token 117e27fc0a6f775626cc7e9c35c9c075a73b152a2d70ecd0c080a27a61fc8ccf" -F "username=e57e6fa8-9d74-40ce-bd01-7214747706d9" -F "password=e57e6fa8-9d74-40ce-bd01-7214747706d9" -X POST http://127.0.0.1:8000/api/change-username/
+
+
  
 
 

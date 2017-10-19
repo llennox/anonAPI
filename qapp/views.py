@@ -25,11 +25,10 @@ from knox.settings import CONSTANTS
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
 import uuid
+import cloudinary.uploader
+import cloudinary
+import cloudinary.api
 
-
-bucket_name ="anonshot"
-AWS_ACCESS_KEY_ID="AKIAJ27Z4MRCX3KSY6YQ"
-AWS_SECRET_ACCESS_KEY="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"
 
 
 def api_documentation(request):  ### popup that presents rules. 
@@ -360,7 +359,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         nlat = lat + 1
         photos2 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=lon)
         nlat = lat - 1
-        photos3 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=lon) 
+        photos3 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=lon)
         nlon = lon + 1 
         photos4 = Photo.objects.filter(lat__startswith=lat, lon__startswith=nlon)
         nlon = lon - 1 
@@ -414,7 +413,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                 destination.write(chunk) ####delete this later writes photos to memory
             destination.close()
             try:
-                self.push_picture_to_s3(uuid)  
+                self.push_picture_to_cloudinary(uuid)  
                 os.remove(photo)
             except:
                 Photo.objects.get(uuid=uuid).delete()
@@ -432,7 +431,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             if profile.uuid == photo.useruuid:
                 comments = Comments.objects.filter(photouuid=photo.uuid)
                 photo.delete()
-                self.delete_picture_from_s3(request.data['uuid'])
+                #self.delete_picture_from_s3(request.data['uuid'])
                 return Response("photo deleted", status=status.HTTP_202_ACCEPTED)
             else:
                 return Response("user does not own photo", status=status.HTTP_400_BAD_REQUEST)
@@ -509,7 +508,15 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             raise Exception
             return HttpResponse(status=500)
 
-        
+    def push_picture_to_cloudinary(self, uuid):
+        try:
+            image = '%s.jpg' % uuid
+            response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
+            return
+        except:
+            raise Exception
+            return HttpResponse(status=500)
+           
         
     def roundgps(self, fl, request):
         var = request.data[fl]
