@@ -12,6 +12,7 @@ class CommentsSerializer(serializers.HyperlinkedModelSerializer):
 class PhotoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Photo
+
         fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -23,5 +24,12 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-    
+class LinkedSerializer(serializers.HyperlinkedModelSerializer):
+
+    comments = CommentsSerializer(many=True)
+
+    class Meta:
+        model = Photo
+
+        fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid', 'comments')
 

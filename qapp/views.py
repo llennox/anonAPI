@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from boto.s3.key import Key
 from math import radians, cos, sin, asin, sqrt
 import math, hashlib, sys, random, os, boto, string
-from qapp.serializers import PhotoSerializer, CommentsSerializer, UserSerializer
+from qapp.serializers import PhotoSerializer, CommentsSerializer, UserSerializer, LinkedSerializer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
@@ -28,6 +28,7 @@ import uuid
 import cloudinary.uploader
 import cloudinary
 import cloudinary.api
+import json
 
 
 
@@ -312,21 +313,32 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
     
         user = request._auth.user
         photos = self.returnObjects(*args)
-        serializer = PhotoSerializer(photos, many=True)
-        lat1 = self.roundGET(args[0], 5)
-        lon1 = self.roundGET(args[1], 5)
-        for photo in serializer.data: # do the haversin and attach comments proly a new litt func 
-            lat2 = float(photo['lat'])
-            lon2 = float(photo['lon'])
-            photo['distance'] = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-            uuid = list(photo.values())[0]
+        print(photos)
+        print(type(photos))
+        
+        #serializer = PhotoSerializer(photos, many=True)
+
+        #lat1 = self.roundGET(args[0], 5)
+        #lon1 = self.roundGET(args[1], 5)
+        #for photo in photos: # do the haversin and attach comments proly a new litt func 
+            #lat2 = float(photo['lat'])
+            #lon2 = float(photo['lon'])
+            #print(photo.uuid)
+            #print(photo.lat)
+            #print(photo.distance)
+            #photo['distance'] = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+            #uuid = photo.uuid
+            
             #photoinstance = Photo.objects.get(uuid=uuid)
-            counter = 0
-            for comment1 in Photo.return_comments(uuid):  
-                counter += 1             
-                photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
-        data = serializer.data
-        return Response(data, status=status.HTTP_200_OK)
+            #counter = 0
+            #for comment1 in Photo.return_comments(uuid):  
+                #counter += 1             
+                #photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
+        serializer = LinkedSerializer(instance=photos)
+        
+        
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
