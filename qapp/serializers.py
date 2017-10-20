@@ -23,13 +23,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('is_staff', 'is_superuser', 'is_active', 'date_joined')
 
 
-
 class LinkedSerializer(serializers.HyperlinkedModelSerializer):
-
     comments = CommentsSerializer(many=True)
-
     class Meta:
         model = Photo
 
         fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid', 'comments')
+
+
+
 

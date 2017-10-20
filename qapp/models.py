@@ -8,13 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from knox.models import AuthToken
 
-class Comments(models.Model):
-    poster = models.CharField(max_length=80, default="anon")
-    photouuid = models.UUIDField(default=None)
-    comment = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    useruuid = models.UUIDField()
+
 
 class Photo(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -25,8 +19,17 @@ class Photo(models.Model):
     visible = models.BooleanField(default=True)
     caption = models.CharField(max_length=125, default="")
     useruuid = models.UUIDField()
-    comments = models.ManyToManyField(Comments)
-        
+    def return_comments(self):
+        comments = Comments.objects.filter(photouuid=self).order_by('timestamp')
+        return comments
+
+class Comments(models.Model):
+    poster = models.CharField(max_length=80, default="anon")
+    photouuid = models.UUIDField(default=None)
+    comment = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    useruuid = models.UUIDField()
 
 class Messages(models.Model):
     sender = models.CharField(max_length=50, default="anon")
