@@ -320,19 +320,20 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
     
         user = request._auth.user
         photos = self.returnObjects(*args)
-        serializer = PhotoSerializer(photos, many=True)
         lat1 = self.roundGET(args[0], 5)
         lon1 = self.roundGET(args[1], 5)
-        for photo in serializer.data: # do the haversin and attach comments proly a new litt func 
-            lat2 = float(photo['lat'])
-            lon2 = float(photo['lon'])
-            photo['distance'] = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-            uuid = list(photo.values())[0]
+        for photo in photos: # do the haversin and attach comments proly a new litt func 
+            lat2 = float(photo.lat)
+            lon2 = float(photo.lon)
+            photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+            uuid = photo.uuid
             #photoinstance = Photo.objects.get(uuid=uuid)
             counter = 0
             for comment1 in Photo.return_comments(uuid):  
                 counter += 1             
                 photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
+        photos.order_by('distance')
+        serializer = PhotoSerializer(photos, many=True)
         data = serializer.data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -364,31 +365,15 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lat = int(lat)
         lon = int(lat)
         #lon = int(lon)
-        photos1 = Photo.objects.filter(lat__startswith=lat, lon__startswith=lon)
-        #self.return_comments(photos1)
-        nlat = lat + 1
-        photos2 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=lon)
-        nlat = lat - 1
-        photos3 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=lon)
-        nlon = lon + 1 
-        photos4 = Photo.objects.filter(lat__startswith=lat, lon__startswith=nlon)
-        nlon = lon - 1 
-        photos5 = Photo.objects.filter(lat__startswith=lat, lon__startswith=nlon)
-        nlon = lon - 1 
-        nlat = lat - 1 
-        photos6 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=nlon)
-        nlon = lon + 1 
-        nlat = lat + 1 
-        photos7 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=nlon)
-        nlon = lon + 1 
-        nlat = lat - 1 
-        photos8 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=nlon)
-        nlon = lon - 1 
-        nlat = lat + 1 
-        photos9 = Photo.objects.filter(lat__startswith=nlat, lon__startswith=nlon)
-        photos = list(chain(photos1, photos2, photos3, photos4, photos5, photos6, photos7, photos8, photos9))
+        latp = lat + 1
+        latm = lat - 1
+        lonp = lon + 1
+        lonm = lon -1
+        photos = Photo.objects.filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
+        
         lat1 = self.roundGET(args[0], 5)
         lon1 = self.roundGET(args[1], 5)
+        return(photos)
         for photo in photos: # do the haversin and attach comments proly a new litt func 
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
