@@ -29,6 +29,7 @@ import cloudinary.uploader
 import cloudinary
 import cloudinary.api
 from rest_framework.renderers import JSONRenderer
+import json
 
 
 
@@ -120,6 +121,7 @@ class AccountCreation(APIView):
            data['password']= uu
            return Response(data, status=status.HTTP_201_CREATED)
         serializer = UserSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
@@ -265,7 +267,7 @@ class CommentViewSet(APIView):
             profile = Profile.objects.get(user=user)
         except:
             return Response("user not found", status=status.HTTP_400_BAD_REQUEST)
-        print("here1")
+
         request.data['useruuid'] = str(profile.uuid)
         if profile.isanon == True:
             request.data['poster'] = 'anon'
@@ -319,23 +321,28 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
     
         user = request._auth.user
-        photos = self.returnObjects(*args)
+        photos1 = self.returnObjects(*args)
         lat1 = self.roundGET(args[0], 5)
         lon1 = self.roundGET(args[1], 5)
-        for photo in photos: # do the haversin and attach comments proly a new litt func 
+        #serializer = PhotoSerializer(photos, many=True)
+        photos = {}
+        counter = 1
+        for photo in photos1: # do the haversin and attach comments proly a new litt func 
+            data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
             photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             uuid = photo.uuid
-            #photoinstance = Photo.objects.get(uuid=uuid)
-            counter = 0
-            for comment1 in Photo.return_comments(uuid):  
-                counter += 1             
-                photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
-        photos.order_by('distance')
-        serializer = PhotoSerializer(photos, many=True)
-        data = serializer.data
-        return Response(data, status=status.HTTP_200_OK)
+           
+            comments = Photo.return_comments(uuid)
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+            photos['photo' + str(counter)] = data
+
+            counter +=1
+            
+        return JsonResponse(photos, safe=False,status=status.HTTP_200_OK)
 
 
 
@@ -397,7 +404,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         self.roundgps('lon' ,request)
         self.roundgps('lat' ,request)
         serializer = PhotoSerializer(data=request.data)
-        print(serializer.initial_data)
+
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
             serializer.save()
             uuid = serializer.data['uuid']
