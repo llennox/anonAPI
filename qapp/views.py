@@ -121,7 +121,7 @@ class AccountCreation(APIView):
            data['password']= uu
            return Response(data, status=status.HTTP_201_CREATED)
         serializer = UserSerializer(data=request.data)
-
+        print(request.data)
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
@@ -267,7 +267,7 @@ class CommentViewSet(APIView):
             profile = Profile.objects.get(user=user)
         except:
             return Response("user not found", status=status.HTTP_400_BAD_REQUEST)
-
+        print("here1")
         request.data['useruuid'] = str(profile.uuid)
         if profile.isanon == True:
             request.data['poster'] = 'anon'
@@ -335,14 +335,15 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             uuid = photo.uuid
            
             comments = Photo.return_comments(uuid)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
-'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
-'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+            data={'uuid':'photo.uuid','lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':'photo.timestamp',\
+'caption':photo.caption,'useruuid':'photo.useruuid','photo_distance':photo.distance,\
+'comments':[{'photouuid':'com.photouuid','comments':com.comment,'poster':com.poster,'timestamp':'com.timestamp','uuid':'com.uuid','useruuid':'com.useruuid'} for com in comments]}
             photos['photo' + str(counter)] = data
-
+        
             counter +=1
-            
-        return JsonResponse(photos, safe=False,status=status.HTTP_200_OK)
+        photos = json.dumps(photos,indent=4, separators=(',', ': '))
+        #JSONRenderer().render(photos)
+        return Response(photos, status=status.HTTP_200_OK)
 
 
 
@@ -404,7 +405,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         self.roundgps('lon' ,request)
         self.roundgps('lat' ,request)
         serializer = PhotoSerializer(data=request.data)
-
+        print(serializer.initial_data)
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
             serializer.save()
             uuid = serializer.data['uuid']
