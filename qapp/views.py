@@ -308,7 +308,7 @@ class CommentViewSet(APIView):
 class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    renderer_classes = (JSONRenderer, )
+
 #serializer = UserSerializer()
           # data = serializer.data
           # data['username'] = uu
@@ -341,9 +341,10 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             photos['photo' + str(counter)] = data
         
             counter +=1
-        photos = json.dumps(photos,indent=4, separators=(',', ': '))
+        #photos = json.dumps(photos,indent=4, separators=(',', ': '))
         #JSONRenderer().render(photos)
-        return Response(photos, status=status.HTTP_200_OK)
+        print(type(photos))
+        return Response(photos, status=status.HTTP_200_OK, content_type='json')
 
 
 
