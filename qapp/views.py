@@ -345,7 +345,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         #JSONRenderer().render(photos)
         print(type(photos))
         returnphotos = {}
-        returnphotos['[:0*]'] = photos
+        returnphotos['objects'] = photos
         print(returnphotos)
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
