@@ -57,8 +57,7 @@ class PhotoTests(APITestCase):
         url = reverse('photos', args=['12.11111', '12.11111']) 
         response = self.client.get(url, format='json', HTTP_AUTHORIZATION='Token ' + authtoken) 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        for photo in response.data:
-            self.assertEqual(photo['distance'], True)
+        
 
     def test_user_delete_photo(self):
         photouuid, authtoken = self.test_uploads_photo()

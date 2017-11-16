@@ -326,7 +326,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lon1 = self.roundGET(args[1], 5)
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
-        counter = 1
+
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
             data = {}
             lat2 = float(photo.lat)
@@ -340,9 +340,9 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
 
-            photos.append(data) #I need to pudate here instead of doing this stupid counter
+            photos.append(data) 
         
-            counter +=1
+
         #photos = json.dumps(photos,indent=4, separators=(',', ': '))
         #JSONRenderer().render(photos)
         print(type(photos))
