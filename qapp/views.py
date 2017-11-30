@@ -123,7 +123,7 @@ class AccountCreation(APIView):
            data['password']= uu
            return Response(data, status=status.HTTP_201_CREATED)
         serializer = UserSerializer(data=request.data)
-        print(request.data)
+      
         if serializer.is_valid():
             serializer.save()
             user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
@@ -182,15 +182,9 @@ class LILOViewSet(APIView):
 
     
 
-    def get(self, request, *args, format=None): # this doesn't work. doesn't really matter cause we can delete key on the phone side 
-        photos = PhotoViewSet()
-        user = photos.auth(args[0])
-        if user.is_authenticated() == True:
-            request.user = user
-            logout(request)
-            return HttpResponse('user has been logged out', status=status.HTTP_202_ACCEPTED)
-        else:
-            return HttpResponse('user is already logged out', status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, format=None): # this doesn't work. doesn't really matter cause we can delete key on the phone side \
+        return HttpResponse('user has been logged out', status=status.HTTP_202_ACCEPTED)
+        
 
     
 
