@@ -50,6 +50,11 @@ class Profile(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     dateCreated = models.DateTimeField(auto_now_add=True)
     created = models.BooleanField(default=False)
+    deviceUUID = models.CharField(max_length=255, default='')
+
+
+
+    
 
 
 

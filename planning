@@ -8,22 +8,23 @@
 
 #change password function # tests done ✔
 
+#analytics model, save device UUID
+
 #recover password
 
 #change algorithm that returns photos to a combo of closest/newest/most_commented
 
 #make a flag function, three flags send me an email 
 
-#resize images
+#video support
 
-#new boolean to say if user has chosen nickname yet. ✔
+#resize images
 
 #messages
 
 #follow function
 
 #search users function
-
 
 #change size limit to 5 mb
 

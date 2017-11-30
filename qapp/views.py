@@ -77,12 +77,14 @@ class ChangeUsername(APIView):
             if User.objects.filter(username=newusername).exclude(username=user.username).exists():
                 return Response("that username is taken", status=status.HTTP_400_BAD_REQUEST)
             user.username = newusername
+            profile.created = True
             user.save()
             return Response("username changed", status=status.HTTP_201_CREATED)
         elif newemail != None:
             if User.objects.filter(email=newemail).exists():
                 return Response("that email is taken", status=status.HTTP_400_BAD_REQUEST)
             user.email = newemail
+            profile.created = True
             return Response("email changed", status=status.HTTP_201_CREATED)
         elif newpassword != None:
             user.set_password(newpassword)
@@ -150,10 +152,13 @@ class LILOViewSet(APIView):
    # permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, format=None):# refreshes token changes isanon
+        print("here")
         username = request.data['username']
         password = request.data['password']
         user = User.objects.get(username=username)
+        
         if user.check_password(password) == True:
+            print("2")
             user.is_active = True
             user.save()
             profile = Profile.objects.get(user=user)
