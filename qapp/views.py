@@ -77,14 +77,14 @@ class ChangeUsername(APIView):
             if User.objects.filter(username=newusername).exclude(username=user.username).exists():
                 return Response("that username is taken", status=status.HTTP_400_BAD_REQUEST)
             user.username = newusername
-            profile.created = True
+            
             user.save()
             return Response("username changed", status=status.HTTP_201_CREATED)
         elif newemail != None:
             if User.objects.filter(email=newemail).exists():
                 return Response("that email is taken", status=status.HTTP_400_BAD_REQUEST)
             user.email = newemail
-            profile.created = True
+           # profile.created = True
             return Response("email changed", status=status.HTTP_201_CREATED)
         elif newpassword != None:
             user.set_password(newpassword)
@@ -121,6 +121,7 @@ class AccountCreation(APIView):
            data['username'] = uu
            data['token'] = token
            data['password']= uu
+           data['user_uuid']= profile.uuid
            return Response(data, status=status.HTTP_201_CREATED)
         serializer = UserSerializer(data=request.data)
       
@@ -139,6 +140,7 @@ class AccountCreation(APIView):
 
             token = AuthToken.objects.create(user)
             data = serializer.data
+            data['user_uuid']= profile.uuid
             data['email']=request.data['email']
             data['username'] = serializer.data['username']
             data['token'] = token
@@ -228,15 +230,14 @@ class UserViewSet(APIView):  # need to make a
                     photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         try: 
-            photos = Photo.objects.filter(uuid=args[0])
-            serializer = PhotoSerializer(photos, many=True)
-            counter = 0
-            for photo in serializer.data:
-                uuid = list(photo.values())[0]
-                for comment1 in Photo.return_comments(uuid):  
-                    counter += 1             
-                    photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            photo = Photo.objects.get(uuid=args[0])
+          
+            uuid = args[0]
+            comments = Photo.return_comments(uuid)  
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance': 'n/a',\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}  
+            return Response(data, status=status.HTTP_202_ACCEPTED)
         except Photo.DoesNotExist:
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
         try: 
@@ -261,18 +262,20 @@ class CommentViewSet(APIView):
 
     def post(self, request, format=None):
         user = request._auth.user
+        
         try:
             user = request.user
             profile = Profile.objects.get(user=user)
         except:
             return Response("user not found", status=status.HTTP_400_BAD_REQUEST)
         print("here1")
-        request.data['useruuid'] = str(profile.uuid)
+        data = request.data.copy()
+        data['useruuid'] = str(profile.uuid)
         if profile.isanon == True:
-            request.data['poster'] = 'anon'
+            data['poster'] = 'anon'
         else: 
-            request.data['poster'] = user.username
-        serializer = CommentsSerializer(data=request.data)
+            data['poster'] = user.username
+        serializer = CommentsSerializer(data=data)           
         if serializer.is_valid(): 
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
