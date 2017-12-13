@@ -71,7 +71,7 @@ class ChangeUsername(APIView):
                 return Response("that email is already in use", status=status.HTTP_400_BAD_REQUEST)
             user.set_password(newpassword)
             user.save()
-            profile.save()
+            profile.save()           
             return Response("success", status=status.HTTP_201_CREATED)
         elif newusername != None:
             if User.objects.filter(username=newusername).exclude(username=user.username).exists():
@@ -112,7 +112,6 @@ class AccountCreation(APIView):
         if request.data['isanon'] == 'True':
            uu = uuid.uuid4()
            user = User.objects.create_user(str(uu), 'anonemail@anonshot.com',  str(uu))
-           
            user.save()
            profile = Profile.objects.create(user=user, isanon=True)
            token = AuthToken.objects.create(user)
@@ -216,22 +215,30 @@ class UserViewSet(APIView):  # need to make a
             return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
  
     def get(self, request, *args, format=None): # if arg is uuid return photo if arg is username return users photos
-
         user = request._auth.user 
         profile = Profile.objects.get(user=user)
+        photos = []  # fix this please 
         if user.username == args[0]:
-            photos = Photo.objects.filter(useruuid=profile.uuid)
+            photos1 = Photo.objects.filter(useruuid=profile.uuid).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
-            counter = 0
-            for photo in serializer.data:
-                uuid = list(photo.values())[0]
-                for comment1 in Photo.return_comments(uuid):  
-                    counter += 1             
-                    photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            for photo in photos1: # do the haversin and attach comments proly a new litt func 
+                data = {}
+                lat2 = float(photo.lat)
+                lon2 = float(photo.lon)
+                #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                uuid = photo.uuid
+                comments = Photo.return_comments(uuid)
+                data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+
+            photos.append(data) 
+        
+        returnphotos = {}
+        returnphotos['objects'] = photos
+        return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         try: 
             photo = Photo.objects.get(uuid=args[0])
-          
             uuid = args[0]
             comments = Photo.return_comments(uuid)  
             data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
@@ -242,15 +249,24 @@ class UserViewSet(APIView):  # need to make a
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
         try: 
             user = User.objects.get(username=args[0])
-            photos = Photo.objects.filter(poster=user.username).order_by('timestamp')
+            photos1 = Photo.objects.filter(useruuid=profile.uuid, poster=user.username).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
-            counter = 0
-            for photo in serializer.data:
-                uuid = list(photo.values())[0]
-                for comment1 in Photo.return_comments(uuid):  
-                    counter += 1             
-                    photo['comment' + str(counter)] = {'comment_poster':comment1.poster,'comment_timestamp': comment1.timestamp,'comment_message':comment1.comment,'comment_uuid':comment1.uuid,'comment_photouuid':comment1.photouuid }
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            for photo in photos1: # do the haversin and attach comments proly a new litt func 
+                data = {}
+                lat2 = float(photo.lat)
+                lon2 = float(photo.lon)
+                #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                uuid = photo.uuid
+                comments = Photo.return_comments(uuid)
+                data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+
+            photos.append(data) 
+        
+            returnphotos = {}
+            returnphotos['objects'] = photos
+            return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         except User.DoesNotExist:
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
         else: 
@@ -324,8 +340,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
     
         user = request._auth.user
         photos1 = self.returnObjects(*args)
-        lat1 = self.roundGET(args[0], 5)
-        lon1 = self.roundGET(args[1], 5)
+        lat1 = float(args[0])
+        lon1 = float(args[1])
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
 
@@ -341,16 +357,10 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-
             photos.append(data) 
         
-
-        #photos = json.dumps(photos,indent=4, separators=(',', ': '))
-        #JSONRenderer().render(photos)
-        print(type(photos))
         returnphotos = {}
         returnphotos['objects'] = photos
-        print(returnphotos)
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
 
@@ -363,9 +373,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         dlat = lat2 - lat1 
         a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
         c = 2 * asin(sqrt(a)) 
-        r = 3956 # Radius of earth in kilometers. Use 3956 for miles
+        r = 6371 # Radius of earth in kilometers. Use 3956 for miles
         distance = c * r
-        distance = self.roundGET(distance, 4)
         return distance
 
 
@@ -376,8 +385,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 
 
     def returnObjects(self, *args):  
-        lat = self.roundGET(args[0], 0)
-        lon = self.roundGET(args[1], 0)
+        lat = float(args[0])
+        lon = float(args[1])
         lat = int(lat)
         lon = int(lat)
         #lon = int(lon)
@@ -387,8 +396,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lonm = lon -1
         photos = Photo.objects.filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
         
-        lat1 = self.roundGET(args[0], 5)
-        lon1 = self.roundGET(args[1], 5)
+        lat1 = float(args[0])
+        lon1 = float(args[1])
         return(photos)
         for photo in photos: # do the haversin and attach comments proly a new litt func 
             lat2 = float(photo.lat)
@@ -410,8 +419,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         else:
             request.data['poster'] = user.username
         request.data['visible'] = True 
-        self.roundgps('lon' ,request)
-        self.roundgps('lat' ,request)
+        #self.roundgps('lon' ,request)
+        #self.roundgps('lat' ,request)
         serializer = PhotoSerializer(data=request.data)
         print(serializer.initial_data)
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
