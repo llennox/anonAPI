@@ -426,7 +426,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
             serializer.save()
             uuid = serializer.data['uuid']
-            f=request.data['media']
+            f=request.data['file']
             destination=open('%s.jpg' % uuid , 'wb+')
             photo = '%s.jpg' % uuid
             for chunk in f.chunks():
