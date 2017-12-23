@@ -427,14 +427,18 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             serializer.save()
             uuid = serializer.data['uuid']
             f=request.data['file']
-            destination=open('%s.jpg' % uuid , 'wb+')
-            photo = '%s.jpg' % uuid
+            destination=open('%s' % uuid , 'wb+')
+            photo = '%s' % uuid
             for chunk in f.chunks():
                 destination.write(chunk) ####delete this later writes photos to memory
             destination.close()
             try:
-                self.push_picture_to_cloudinary(uuid)  
-                os.remove(photo)
+                if request.data['isvideo'] == True:
+                    self.push_picture_to_cloudinary(uuid)  
+                    os.remove(photo)
+                else:
+                    self.push_picture_to_cloudinary(uuid)  
+                    os.remove(photo)
             except:
                 Photo.objects.get(uuid=uuid).delete()
                 os.remove(photo)
@@ -528,9 +532,19 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             raise Exception
             return HttpResponse(status=500)
 
+    def push_video_to_cloudinary(self, uuid):
+        try:
+            video = '%s' % uuid
+            response = cloudinary.uploader.upload(str(video), resource_type = "video", public_id=str(uuid))
+            return
+        except:
+            raise Exception
+            return HttpResponse(status=500)
+
+
     def push_picture_to_cloudinary(self, uuid):
         try:
-            image = '%s.jpg' % uuid
+            image = '%s' % uuid
             response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
             return
         except:

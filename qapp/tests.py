@@ -46,8 +46,8 @@ class PhotoTests(APITestCase):
     def test_uploads_photo(self):
         authtoken = AccountTests.test_create_account(self)
         url = reverse('photos')
-        media = SimpleUploadedFile(name='iceax.jpg', content=open('/home/gene-art/sites/anonAPI/qapp/iceax.jpg', 'rb').read(), content_type='multipart/form-data')
-        data = {"lat":"12.11111", "lon":"12.11111", "caption":"this is a caption", "media":media}
+        media = SimpleUploadedFile(name='iceax.jpg', content=open('/home/connlloc/sites/q/qapp/iceax.jpg', 'rb').read(), content_type='multipart/form-data')
+        data = {"lat":"12.11111", "lon":"12.11111", "caption":"this is a caption", "file":media}
         response = self.client.post(url, data, format='multipart', HTTP_AUTHORIZATION='Token ' + authtoken) 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.data['uuid'], authtoken
