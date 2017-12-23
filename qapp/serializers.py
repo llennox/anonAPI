@@ -13,7 +13,7 @@ class PhotoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Photo
 
-        fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid')
+        fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid', 'isvideo')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

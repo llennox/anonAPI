@@ -418,6 +418,10 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             request.data['poster'] = 'anon'
         else:
             request.data['poster'] = user.username
+        if request.data['isvideo'] == 'True':
+            request.data['isvideo'] = True
+        else:
+            request.data['isvideo'] = False
         request.data['visible'] = True 
         #self.roundgps('lon' ,request)
         #self.roundgps('lat' ,request)
@@ -434,15 +438,15 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             destination.close()
             try:
                 if request.data['isvideo'] == True:
-                    self.push_picture_to_cloudinary(uuid)  
+                    response = self.push_video_to_cloudinary(uuid) 
                     os.remove(photo)
                 else:
-                    self.push_picture_to_cloudinary(uuid)  
+                    response = self.push_picture_to_cloudinary(uuid)  
                     os.remove(photo)
             except:
                 Photo.objects.get(uuid=uuid).delete()
                 os.remove(photo)
-                return Response("photo failed to upload", status=status.HTTP_400_BAD_REQUEST)
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
             data = serializer.data
             return Response(data, status=status.HTTP_201_CREATED)
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
@@ -536,7 +540,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         try:
             video = '%s' % uuid
             response = cloudinary.uploader.upload(str(video), resource_type = "video", public_id=str(uuid))
-            return
+            return response
         except:
             raise Exception
             return HttpResponse(status=500)
