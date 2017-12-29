@@ -232,19 +232,19 @@ class UserViewSet(APIView):  # need to make a
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-            photos.append(data) 
+                photos.append(data) 
         
-        returnphotos = {}
-        returnphotos['objects'] = photos
-        return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
+            returnphotos = {}
+            returnphotos['objects'] = photos
+            return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         try: 
             photo = Photo.objects.get(uuid=args[0])
             uuid = args[0]
             comments = Photo.return_comments(uuid)  
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}  
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            return Response(data, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         except Photo.DoesNotExist:
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
         try: 
@@ -344,19 +344,19 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lon1 = float(args[1])
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
-
+        counter = 0
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
             data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
             photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             uuid = photo.uuid
-           
+                   
             comments = Photo.return_comments(uuid)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'counter':counter,'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
-
+            counter += 1
             photos.append(data) 
         
         returnphotos = {}
