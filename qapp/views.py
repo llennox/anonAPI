@@ -342,6 +342,9 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         photos1 = self.returnObjects(*args)
         lat1 = float(args[0])
         lon1 = float(args[1])
+        page = int(args[2])
+        page = page * 8
+        first_page = page - 8
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
         counter = 0
@@ -357,10 +360,11 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             counter += 1
-            photos.append(data) 
-        
+            photos.append(data)
+        d = sorted(photos, key=lambda k: k['photo_distance'])[first_page:page]
+        t = sorted(d, key=lambda k: k['timestamp'])[first_page:page]
         returnphotos = {}
-        returnphotos['objects'] = photos
+        returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
 
@@ -388,23 +392,14 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lat = float(args[0])
         lon = float(args[1])
         lat = int(lat)
-        lon = int(lat)
+        lon = int(lon)
         #lon = int(lon)
         latp = lat + 1
         latm = lat - 1
         lonp = lon + 1
         lonm = lon -1
         photos = Photo.objects.filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
-        
-        lat1 = float(args[0])
-        lon1 = float(args[1])
-        return(photos)
-        for photo in photos: # do the haversin and attach comments proly a new litt func 
-            lat2 = float(photo.lat)
-            lon2 = float(photo.lon)
-            photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-        photos.sort(key=lambda photo:photo.distance) #x:(x['title'], x['title_url'], x['id']))
-        return photos[:100]# attach comments and do the haversine 
+        return photos# attach comments and do the haversine 
         #for arg in *args search query database for ex. 32.32*, 23.23* if .count() >= 60: otherfunc(query) else query for 32.3*, 23.2*  
         # and so on and so forth 
 
@@ -488,74 +483,16 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             var = var * -1
         return var
 
-            
-  
-    def delete_picture_from_s3(self,uuid):  # check auth to delete photo 
-
-        try:
-            conn = boto.connect_s3(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-
-            bucket = conn.get_bucket(bucket_name)
-            # go through each version of the file
-            key = '%s.jpg' % uuid
-            fn = '%s.jpg' % uuid
-            k = Key(bucket)
-
-            k.delete_key(key)          
-            # we need to make it public so it can be accessed publicly
-            # using a URL like http://s3.amazonaws.com/bucket_name/key
-
-            # remove the file from the web server
-
-
-        except:
-            return HttpResponse(status=500)
-
-
-    def push_picture_to_s3(self,uuid):
-        try: 
-            return
-            conn = boto.connect_s3(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-            
-            bucket = conn.get_bucket(bucket_name)
-            
-    # go through each version of the file
-            key = '%s.jpg' % uuid
-            fn = '%s.jpg' % uuid
-            # create a key to keep track of our file in the storage 
-            k = Key(bucket)
-            k.key = key            
-            k.set_contents_from_filename(fn)          
-            # we need to make it public so it can be accessed publicly
-            # using a URL like http://s3.amazonaws.com/bucket_name/key
-            k.make_public()
-            # remove the file from the web server
-
-            return 
-        except:
-            raise Exception
-            return HttpResponse(status=500)
-
-    def push_video_to_cloudinary(self, uuid):
-        try:
-            video = '%s' % uuid
-            response = cloudinary.uploader.upload(str(video), resource_type = "video", public_id=str(uuid))
-            return response
-        except:
-            raise Exception
-            return HttpResponse(status=500)
-
 
     def push_picture_to_cloudinary(self, uuid):
         try:
             image = '%s' % uuid
-            response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
+            #response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
             return
         except:
             raise Exception
             return HttpResponse(status=500)
            
-        
     def roundgps(self, fl, request):
         var = request.data[fl]
         var = float(var)

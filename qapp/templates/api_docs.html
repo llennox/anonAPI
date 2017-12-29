@@ -81,7 +81,7 @@ if isanon = False users' comments and photos will not be attached to their accou
 </div>
 <div style="border: 2px solid black;border-radius: 5px;">
 <p style="font-size:130%">POST request: uploads photo</p>
-<p>curl -F "lat=12.111" -F "lon=12.111" -F "authtoken=authtoken" -F "caption=this is a caption" -H "Content-Type: multipart/form-data" -F "media=@/home/directory/file.jpg" -X POST https://anonshot.com/photos/
+<p>curl -F "caption=6" -H "Content-Type: multipart/form-data" -F "isvideo=False" -F "lat=12.111113" -F "lon=12.111113" -F "file=@/home/gene-art/Pictures/wave.jpg" -H "Authorization: Token token" -X POST http://127.0.0.1:8000/api/photos/
 </p>
 <p style="color:blue;">https://anonshot.com/photos/</p>
 <p style="color:green;">data = {"lat":"12.111", "lon":"12.111", "authtoken":authtoken, "caption":"this is a caption", "media":media}</p>
