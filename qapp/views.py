@@ -343,8 +343,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lat1 = float(args[0])
         lon1 = float(args[1])
         page = int(args[2])
-        page = page * 8
-        first_page = page - 8
+        page1 = page * 8
+        first_page = page1 - 8
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
         counter = 0
@@ -361,8 +361,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             counter += 1
             photos.append(data)
-        d = sorted(photos, key=lambda k: k['photo_distance'])[first_page:page]
-        t = sorted(d, key=lambda k: k['timestamp'])[first_page:page]
+        d = sorted(photos, key=lambda k: k['photo_distance'])[first_page:page1]
+        t = sorted(d, key=lambda k: k['timestamp'])
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
@@ -487,7 +487,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
     def push_picture_to_cloudinary(self, uuid):
         try:
             image = '%s' % uuid
-            #response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
+            response = cloudinary.uploader.upload(str(image), public_id=str(uuid))
             return
         except:
             raise Exception
