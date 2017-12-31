@@ -113,10 +113,11 @@ class AccountCreation(APIView):
            uu = uuid.uuid4()
            user = User.objects.create_user(str(uu), 'anonemail@anonshot.com',  str(uu))
            user.save()
-           profile = Profile.objects.create(user=user, isanon=True)
+           profile = Profile.objects.create(user=user, isanon=True, created=False)
            token = AuthToken.objects.create(user)
            serializer = UserSerializer()
            data = serializer.data
+           data['created'] = False
            data['username'] = uu
            data['token'] = token
            data['password']= uu
@@ -139,6 +140,7 @@ class AccountCreation(APIView):
 
             token = AuthToken.objects.create(user)
             data = serializer.data
+            data['created'] = True
             data['user_uuid']= profile.uuid
             data['email']=request.data['email']
             data['username'] = serializer.data['username']
