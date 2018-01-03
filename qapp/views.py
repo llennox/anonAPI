@@ -38,7 +38,7 @@ def api_documentation(request):  ### popup that presents rules.
     
     return render(request, 'api_docs.html') 
 
-def isanonSwitch(request):
+class isanonSwitch(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     
@@ -54,7 +54,7 @@ def isanonSwitch(request):
             elif profile.created == True and profile.isanon == False:
                 profile.isanon = True
                 profile.save()
-                return Response(True, status=status.HTTP_201_CREATED
+                return Response(True, status=status.HTTP_201_CREATED)
             else:
                 return Response("failed", status=status.HTTP_400_BAD_REQUEST)
         except:
