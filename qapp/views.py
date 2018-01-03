@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from boto.s3.key import Key
 from math import radians, cos, sin, asin, sqrt
-import math, hashlib, sys, random, os, boto, string
+import math, hashlib, sys, random, os, boto, string, datetime
 from qapp.serializers import PhotoSerializer, CommentsSerializer, UserSerializer, LinkedSerializer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -25,9 +25,6 @@ from knox.settings import CONSTANTS
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.settings import api_settings
 import uuid
-import cloudinary.uploader
-import cloudinary
-import cloudinary.api
 from rest_framework.renderers import JSONRenderer
 import json
 
@@ -367,26 +364,32 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         page = int(args[2])
         page1 = page * 8
         first_page = page1 - 8
-        #serializer = PhotoSerializer(photos, many=True)
         photos = []
-       
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
             data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
             photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             uuid = photo.uuid
-                   
             comments = Photo.return_comments(uuid)
             data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        d = sorted(photos, key=lambda k: k['photo_distance'])[first_page:page1]
+        d = sorted(photos, key=lambda k: k['photo_distance'])
+        rank = 0
+        for p in d:
+            p['rank'] = rank
+            rank = rank + 1
         t = sorted(d, key=lambda k: k['timestamp'])
+        rank = 0
+        for p in t:
+            p['rank'] = p['rank'] + rank   
+            rank = rank + 1
+        g = sorted(d, key=lambda k: k['rank'])[first_page:page1]
         returnphotos = {}
-        returnphotos['objects'] = t
+        returnphotos['objects'] = g
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
 
@@ -401,6 +404,9 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         c = 2 * asin(sqrt(a)) 
         r = 6371 # Radius of earth in kilometers. Use 3956 for miles
         distance = c * r
+        stringDistance = str(distance)
+        distance = stringDistance[:7]
+        distance = float(distance)
         return distance
 
 
@@ -466,7 +472,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                     return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)  
             except:
                 Photo.objects.get(uuid=uuid).delete()
-                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+                return Response("fail", status=status.HTTP_400_BAD_REQUEST)
             data = serializer.data
             return Response(data, status=status.HTTP_201_CREATED)
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
