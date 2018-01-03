@@ -38,7 +38,27 @@ def api_documentation(request):  ### popup that presents rules.
     
     return render(request, 'api_docs.html') 
 
-
+def isanonSwitch(request):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    
+    def post(self, request, forman=None):
+        user = request._auth.user
+        try:
+            uuid = request.data['user_uuid']
+            profile = Profile.objects.get(user=user, uuid=uuid)
+            if profile.created == True and profile.isanon == True:
+                profile.isanon = False
+                profile.save()
+                return Response(False, status=status.HTTP_201_CREATED)
+            elif profile.created == True and profile.isanon == False:
+                profile.isanon = True
+                profile.save()
+                return Response(True, status=status.HTTP_201_CREATED
+            else:
+                return Response("failed", status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response("failed", status=status.HTTP_400_BAD_REQUEST)
 
 class ChangeUsername(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -67,8 +87,8 @@ class ChangeUsername(APIView):
             user.email = newemail
             profile = Profile.objects.get(user=user)
             profile.created = True
-            if User.objects.filter(email=newemail).exists():
-                return Response("that email is already in use", status=status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(email=newemail).exists() or User.objects.filter(username=newusername).exists():
+                return Response("that email or username is already in use", status=status.HTTP_400_BAD_REQUEST)
             user.set_password(newpassword)
             user.save()
             profile.save()           
@@ -349,7 +369,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         first_page = page1 - 8
         #serializer = PhotoSerializer(photos, many=True)
         photos = []
-        counter = 0
+       
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
             data = {}
             lat2 = float(photo.lat)
@@ -358,10 +378,10 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             uuid = photo.uuid
                    
             comments = Photo.return_comments(uuid)
-            data={'counter':counter,'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
-            counter += 1
+            
             photos.append(data)
         d = sorted(photos, key=lambda k: k['photo_distance'])[first_page:page1]
         t = sorted(d, key=lambda k: k['timestamp'])
@@ -428,21 +448,24 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             serializer.save()
             uuid = serializer.data['uuid']
             f=request.data['file']
-            destination=open('%s' % uuid , 'wb+')
-            photo = '%s' % uuid
-            for chunk in f.chunks():
-                destination.write(chunk) ####delete this later writes photos to memory
-            destination.close()
+           
             try:
                 if request.data['isvideo'] == True:
-                    response = self.push_video_to_cloudinary(uuid) 
-                    os.remove(photo)
+                    destination=open('/home/connlloc/sites/q/photos/%s.mp4' % uuid, 'wb+')
+                    photo = '%s' % uuid
+                    for chunk in f.chunks():
+                        destination.write(chunk) ####delete this later writes photos to memory
+                    destination.close()
+                elif request.data['isvideo'] == False:
+                    destination=open('/home/connlloc/sites/q/photos/%s.jpg' % uuid, 'wb+')
+                    photo = '%s' % uuid
+                    for chunk in f.chunks():
+                        destination.write(chunk) ####delete this later writes photos to memory
+                    destination.close()
                 else:
-                    response = self.push_picture_to_cloudinary(uuid)  
-                    os.remove(photo)
+                    return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)  
             except:
                 Photo.objects.get(uuid=uuid).delete()
-                os.remove(photo)
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
             data = serializer.data
             return Response(data, status=status.HTTP_201_CREATED)
