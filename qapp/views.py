@@ -88,8 +88,16 @@ class ChangeUsername(APIView):
                 return Response("that email or username is already in use", status=status.HTTP_400_BAD_REQUEST)
             user.set_password(newpassword)
             user.save()
-            profile.save()           
-            return Response("success", status=status.HTTP_201_CREATED)
+            profile.save()   
+            serializer = UserSerializer()
+            data = serializer.data
+            data['created'] = False
+            data['username'] = uu
+            data['token'] = token
+            data['password']= uu
+            data['user_uuid']= profile.uuid
+            return Response(data, status=status.HTTP_201_CREATED)       
+            
         elif newusername != None:
             if User.objects.filter(username=newusername).exclude(username=user.username).exists():
                 return Response("that username is taken", status=status.HTTP_400_BAD_REQUEST)
