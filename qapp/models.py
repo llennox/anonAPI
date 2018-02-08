@@ -17,7 +17,7 @@ class Photo(models.Model):
     poster = models.CharField(max_length=50, default="anon")
     timestamp = models.DateTimeField(auto_now_add=True)
     visible = models.BooleanField(default=True)
-    caption = models.CharField(max_length=125, default="")
+    caption = models.CharField(max_length=255, default="")
     useruuid = models.UUIDField()
     isvideo = models.BooleanField(default=False)
     def return_comments(self):
