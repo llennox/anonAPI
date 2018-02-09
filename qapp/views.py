@@ -64,15 +64,15 @@ class ChangeUsername(APIView):
     def post(self, request, format=None): # this is for creating an account from anon or changing, password, username or email
         user = request._auth.user
         try:
-            newusername = request.data['newusername']
+            newusername = request.data['username']
         except:
             newusername = None
         try:
-            newpassword = request.data['newpassword']
+            newpassword = request.data['password']
         except:
             newpassword = None
         try: 
-            newemail = request.data['newemail']
+            newemail = request.data['email']
         except:
             newemail = None
         try:
@@ -91,7 +91,7 @@ class ChangeUsername(APIView):
             profile.save()   
             serializer = UserSerializer()
             data = serializer.data
-            data['created'] = False
+            data['created'] = True
             data['username'] = uu
             data['token'] = token
             data['password']= uu
@@ -350,6 +350,30 @@ class CommentViewSet(APIView):
             return Response("user does not own comment", status=status.HTTP_400_BAD_REQUEST)
         
 
+class DeletePhotoViewSet(APIView):
+    
+    def post(self, request): # make sure user owns photo delete comments too
+        user = request._auth.user
+        profile = Profile.objects.get(user=user)
+        try:
+            photo = Photo.objects.get(uuid=request.data['uuid'])
+            if profile.uuid == photo.useruuid:
+                if photo.isvideo == True:
+                    uuid_str = ('/home/connlloc/sites/q/photos/%s.mp4' % request.data['uuid'])
+                else:
+                    uuid_str = ('/home/connlloc/sites/q/photos/%s.jpg' % request.data['uuid'])
+                comments = Comments.objects.filter(photouuid=photo.uuid)
+                photo.delete()
+                comments.delete()
+                os.remove(uuid_str)
+                #self.delete_picture_from_s3(request.data['uuid'])
+                return Response("photo deleted", status=status.HTTP_202_ACCEPTED)
+            else:
+                return Response("user does not own photo", status=status.HTTP_400_BAD_REQUEST)
+        except Photo.DoesNotExist:
+            return Response("failure to delete photo from server", status=status.HTTP_400_BAD_REQUEST)
+
+
 class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -489,10 +513,17 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         user = request._auth.user
         profile = Profile.objects.get(user=user)
         try:
-            photo = Photo.objects.get(uuid=request.data['uuid'])
+            return Response(str(request), status=status.HTTP_202_ACCEPTED)
+            photo = Photo.objects.get(uuid=request.data.args.uuid)
             if profile.uuid == photo.useruuid:
+                if photo.isvideo == True:
+                    uuid_str = ('/home/connlloc/sites/q/photos/%s.mp4' % request.data.args.uuid)
+                else:
+                    uuid_str = ('/home/connlloc/sites/q/photos/%s.jpg' % request.data.args.uuid)
                 comments = Comments.objects.filter(photouuid=photo.uuid)
                 photo.delete()
+                comments.delete()
+                os.remove(uuid_str)
                 #self.delete_picture_from_s3(request.data['uuid'])
                 return Response("photo deleted", status=status.HTTP_202_ACCEPTED)
             else:

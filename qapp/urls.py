@@ -7,6 +7,7 @@ from rest_framework import routers
 urlpatterns = [
     url(r'^api/isanonSwitch/$', views.isanonSwitch.as_view(), name='isanonSwitch'),
     url(r'^api/photos/$', views.PhotoViewSet.as_view(), name='photos'),
+    url(r'^api/delete_photo/$', views.DeletePhotoViewSet.as_view(), name='delete_photo'),
     url(r'^api/change-username/$', views.ChangeUsername.as_view(), name='change_username'),
     url(r'^api/change-password/$', views.ChangePassword.as_view(), name='change_password'),
     url(r'^api/comments/$', views.CommentViewSet.as_view(), name='comments'),
