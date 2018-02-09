@@ -35,6 +35,15 @@ def api_documentation(request):  ### popup that presents rules.
     
     return render(request, 'api_docs.html') 
 
+class flagPhoto(APIView):   
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+                              
+    def post(self, request, forman=None):
+        user = request._auth.user
+        return Response("failed", status=status.HTTP_400_BAD_REQUEST)
+
+
 class isanonSwitch(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -64,15 +73,15 @@ class ChangeUsername(APIView):
     def post(self, request, format=None): # this is for creating an account from anon or changing, password, username or email
         user = request._auth.user
         try:
-            newusername = request.data['username']
+            newusername = request.data['newusername']
         except:
             newusername = None
         try:
-            newpassword = request.data['password']
+            newpassword = request.data['newpassword']
         except:
             newpassword = None
         try: 
-            newemail = request.data['email']
+            newemail = request.data['newemail']
         except:
             newemail = None
         try:
@@ -92,9 +101,9 @@ class ChangeUsername(APIView):
             serializer = UserSerializer()
             data = serializer.data
             data['created'] = True
-            data['username'] = uu
+            data['username'] = newusername
             data['token'] = token
-            data['password']= uu
+            data['password']= newpassword
             data['user_uuid']= profile.uuid
             return Response(data, status=status.HTTP_201_CREATED)       
             
@@ -152,6 +161,7 @@ class AccountCreation(APIView):
       
         if serializer.is_valid():
             serializer.save()
+            
             user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
             user.set_password(serializer.data['password'])
             user.save()
@@ -170,7 +180,6 @@ class AccountCreation(APIView):
             data['email']=request.data['email']
             data['username'] = serializer.data['username']
             data['token'] = token
-            data['password']= 'XXXXXXXXXX'
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
