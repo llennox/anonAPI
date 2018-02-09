@@ -509,27 +509,6 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             return Response(data, status=status.HTTP_201_CREATED)
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request): # make sure user owns photo delete comments too
-        user = request._auth.user
-        profile = Profile.objects.get(user=user)
-        try:
-            return Response(str(request), status=status.HTTP_202_ACCEPTED)
-            photo = Photo.objects.get(uuid=request.data.args.uuid)
-            if profile.uuid == photo.useruuid:
-                if photo.isvideo == True:
-                    uuid_str = ('/home/connlloc/sites/q/photos/%s.mp4' % request.data.args.uuid)
-                else:
-                    uuid_str = ('/home/connlloc/sites/q/photos/%s.jpg' % request.data.args.uuid)
-                comments = Comments.objects.filter(photouuid=photo.uuid)
-                photo.delete()
-                comments.delete()
-                os.remove(uuid_str)
-                #self.delete_picture_from_s3(request.data['uuid'])
-                return Response("photo deleted", status=status.HTTP_202_ACCEPTED)
-            else:
-                return Response("user does not own photo", status=status.HTTP_400_BAD_REQUEST)
-        except Photo.DoesNotExist:
-            return Response("failure to delete photo from server", status=status.HTTP_400_BAD_REQUEST)
 
     def clean_content(self, form):
         content = form.cleaned_data['photo']
