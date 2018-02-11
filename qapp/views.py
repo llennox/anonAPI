@@ -44,6 +44,16 @@ class flagPhoto(APIView):
         return Response("failed", status=status.HTTP_400_BAD_REQUEST)
 
 
+#class logOut(APIView):
+ #   authentication_classes = (TokenAuthentication,)
+  #  permission_classes = (IsAuthenticated,)
+
+   # def post(self, request, format=None):
+    #    user = request._auth.user
+     #   try:
+                
+
+
 class isanonSwitch(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -100,6 +110,8 @@ class ChangeUsername(APIView):
             profile.save()   
             serializer = UserSerializer()
             data = serializer.data
+            user.auth_token_set.all().delete()
+            token = AuthToken.objects.create(user)  
             data['created'] = True
             data['username'] = newusername
             data['token'] = token
@@ -185,17 +197,16 @@ class AccountCreation(APIView):
 
 
 class LILOViewSet(APIView):
-    #authentication_classes = (TokenAuthentication,)
-   # permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, format=None):# refreshes token changes isanon
-        print("here")
+    def post(self, request, format=None):# refreshes token changes isanon
+        olduser = request._auth.user
         username = request.data['username']
         password = request.data['password']
         user = User.objects.get(username=username)
-        
         if user.check_password(password) == True:
-            print("2")
+            return HttpResponse('passworked', status=status.HTTP_400_BAD_REQUEST)
             user.is_active = True
             user.save()
             profile = Profile.objects.get(user=user)
@@ -204,12 +215,16 @@ class LILOViewSet(APIView):
             user = authenticate(username=username, password=password)
             login(request, user)  
             user.auth_token_set.all().delete()
-            token = AuthToken.objects.create(user)  
+            token = AuthToken.objects.create(user)
+            oldprofile = Profile.objects.get(user=olduser)
+            oldprofile.delete()
+            olduser.delete()
             #data = {}
             #data['message'] = 'user is now logged in'
             #data['username'] = user.username
             #data['token'] = token
             return Response({
+                'user_uuid': profile.uuid,
                 'user': user.username,
                 'token': token,
                 'created' : profile.created
