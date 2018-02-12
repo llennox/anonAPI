@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse
 from itertools import chain
-from rest_framework import viewsets, status, authentication
+from rest_framework import viewsets, status
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from qapp.models import Photo, Comments, Profile
 from django.contrib.gis.geoip2 import GeoIP2
@@ -150,12 +151,11 @@ class ChangePassword(APIView):
             return Response("comment updated", status=status.HTTP_201_CREATED)
         return Response("comment updated", status=status.HTTP_400_BAD_REQUEST)
 
-class AccountCreation(APIView):
-    authentication_classes = api_settings.DEFAULT_AUTHENTICATION_CLASSES    
+class AccountCreation(APIView):   
    
     def post(self, request, format=None): # user creation return token and log in 
 
-        if request.data['isanon'] == 'True':
+        try:
            uu = uuid.uuid4()
            user = User.objects.create_user(str(uu), 'anonemail@anonshot.com',  str(uu))
            user.save()
@@ -169,48 +169,27 @@ class AccountCreation(APIView):
            data['password']= uu
            data['user_uuid']= profile.uuid
            return Response(data, status=status.HTTP_201_CREATED)
-        serializer = UserSerializer(data=request.data)
-      
-        if serializer.is_valid():
-            serializer.save()
-            
-            user = User.objects.get(username=serializer.data['username'], email=request.data['email'])
-            user.set_password(serializer.data['password'])
-            user.save()
-            
-            try:
-                profile = Profile.objects.create(user=user, isanon=request.data['isanon'], created=True)
-                profile.save()
-            except:
-                profile = Profile.objects.create(user=user, isanon=True, created=True)
-                profile.save()
-
-            token = AuthToken.objects.create(user)
-            data = serializer.data
-            data['created'] = True
-            data['user_uuid']= profile.uuid
-            data['email']=request.data['email']
-            data['username'] = serializer.data['username']
-            data['token'] = token
-            return Response(data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+       except:
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LILOViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)    
+
 
     def post(self, request, format=None):# refreshes token changes isanon
+    #   olduser = User.objects.get(username=request.data['username'])
         olduser = request._auth.user
         username = request.data['username']
-        password = request.data['password']
-        user = User.objects.get(username=username)
-        if user.check_password(password) == True:
-            return HttpResponse('passworked', status=status.HTTP_400_BAD_REQUEST)
+        password = request.data['password'] 
+        user = User.objects.get(username=username) 
+        
+        if user.check_password(password):
             user.is_active = True
             user.save()
             profile = Profile.objects.get(user=user)
-            profile.isanon = request.data['isanon']
+            profile.isanon = False
             profile.save()
             user = authenticate(username=username, password=password)
             login(request, user)  
@@ -219,16 +198,12 @@ class LILOViewSet(APIView):
             oldprofile = Profile.objects.get(user=olduser)
             oldprofile.delete()
             olduser.delete()
-            #data = {}
-            #data['message'] = 'user is now logged in'
-            #data['username'] = user.username
-            #data['token'] = token
-            return Response({
-                'user_uuid': profile.uuid,
-                'user': user.username,
-                'token': token,
-                'created' : profile.created
-             }, status=status.HTTP_202_ACCEPTED)
+            data = {}
+            data['user_uuid'] = profile.uuid
+            data['created'] = profile.created
+            data['username'] = user.username
+            data['token'] = token
+            return Response(data, status=status.HTTP_202_ACCEPTED)
         else:
             return HttpResponse('wrong username or password', status=status.HTTP_400_BAD_REQUEST)
 
@@ -375,7 +350,9 @@ class CommentViewSet(APIView):
         
 
 class DeletePhotoViewSet(APIView):
-    
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request): # make sure user owns photo delete comments too
         user = request._auth.user
         profile = Profile.objects.get(user=user)
