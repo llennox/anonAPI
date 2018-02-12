@@ -169,7 +169,7 @@ class AccountCreation(APIView):
            data['password']= uu
            data['user_uuid']= profile.uuid
            return Response(data, status=status.HTTP_201_CREATED)
-       except:
+        except:
            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
