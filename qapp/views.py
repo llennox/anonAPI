@@ -212,6 +212,7 @@ class LILOViewSet(APIView):
     def get(self, request, *args, format=None): # this doesn't work. doesn't really matter cause we can delete key on the phone side \
         return HttpResponse('user has been logged out', status=status.HTTP_202_ACCEPTED)
         
+
 class ReturnUserPhotos(APIView);
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -255,17 +256,54 @@ class ReturnUserPhotos(APIView);
         returnphotos['objects'] = g
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
-    
-    
-
   
 class UserViewSet(APIView):  # need to make a
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    
+    def put(self, request, *args, format=None):# change password or username make this more secure in the future
+        user = request._auth.user
+        if args[0] == user.username and user.check_password(request.data['password']) == True:
+            user.set_password(request.data['newpassword'])
+            user.save()
+            return Response('new password has been set', status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, format=None):
+        
+        user = request._auth.user
+        if args[0] == user.username and user.check_password(request.data['password']) == True:
+            user.is_active = False
+            user.save()
+            return Response('user has been made inactive', status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
  
     def get(self, request, *args, format=None): # if arg is uuid return photo if arg is username return users photos
         user = request._auth.user 
+        profile = Profile.objects.get(user=user)
+        photos = []  # fix this please 
+        if user.username == args[0]:
+            photos1 = Photo.objects.filter(useruuid=profile.uuid).order_by('timestamp')
+            serializer = PhotoSerializer(photos, many=True)
+            for photo in photos1: # do the haversin and attach comments proly a new litt func 
+                data = {}
+                lat2 = float(photo.lat)
+                lon2 = float(photo.lon)
+                #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                uuid = photo.uuid
+                comments = Photo.return_comments(uuid)
+                data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+
+                photos.append(data) 
+        
+            returnphotos = {}
+            returnphotos['objects'] = photos
+            return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         try: 
             photo = Photo.objects.get(uuid=args[0])
             uuid = args[0]
