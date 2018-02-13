@@ -44,7 +44,7 @@ curl -H "Authorization: Token 117e27fc0a6f775626cc7e9c35c9c075a73b152a2d70ecd0c0
 
 
  
-
+curl -H "Authorization: Token 10f9bd284a44c5419c73ad5451f37154a58a0937c342ba8707fd6cea2e2b44b6" -F "page=1" -F "lat=12.111111111" -F "lon=12.11111111" -F "username=Anon" -X POST https://anonshot.com/api/user-photos/
 
 
 

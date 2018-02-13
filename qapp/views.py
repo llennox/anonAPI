@@ -222,7 +222,7 @@ class ReturnUserPhotos(APIView):
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
         #
         user = request._auth.user
-        photos1 = Photos.objects.filter(poster=request.data['username'])
+        photos1 = Photo.objects.filter(poster=request.data['username'])
         lat1 = float(request.data['lat'])
         lon1 = float(request.data['lon'])
         page = int(request.data['page'])
