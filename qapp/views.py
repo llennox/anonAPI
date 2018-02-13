@@ -213,7 +213,7 @@ class LILOViewSet(APIView):
         return HttpResponse('user has been logged out', status=status.HTTP_202_ACCEPTED)
         
 
-class ReturnUserPhotos(APIView);
+class ReturnUserPhotos(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
