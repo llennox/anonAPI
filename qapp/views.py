@@ -241,7 +241,7 @@ class ReturnUserPhotos(APIView):
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        t = sorted(data, key=lambda k: k['timestamp'])[first_page:page1]
+        t = sorted(data, key=lambda k: k['timestamp'])
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
