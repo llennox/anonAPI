@@ -405,6 +405,16 @@ class DeletePhotoViewSet(APIView):
         except Photo.DoesNotExist:
             return Response("failure to delete photo from server", status=status.HTTP_400_BAD_REQUEST)
 
+class BanCheck(APIView):
+    
+    def post(self, request):
+        deviceUUID = request['deviceUUID']
+        user_set = Profile.objects.filter(deviceUUID=deviceUUID)
+        for user in user_set:
+            if user.banned:
+                return Response(True, status=status.HTTP_202_ACCEPTED)
+        return Response(False, status=status.HTTP_202_ACCEPTED)
+
 
 class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
     authentication_classes = (TokenAuthentication,)
@@ -441,12 +451,12 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        d = sorted(photos, key=lambda k: k['photo_distance'])
+        d = sorted(photos, key=lambda k: k['timestamp'])
         rank = 0
         for p in d:
             p['rank'] = rank
             rank = rank + 1
-        t = sorted(d, key=lambda k: k['timestamp'])
+        t = sorted(d, key=lambda k: k['distance'])
         rank = 0
         for p in t:
             p['rank'] = p['rank'] + rank   

@@ -52,3 +52,7 @@ class Profile(models.Model):
     dateCreated = models.DateTimeField(auto_now_add=True)
     created = models.BooleanField(default=False)
     deviceUUID = models.CharField(max_length=255, default='')
+    banned = models.BooleanField(default=False)
+
+
+
