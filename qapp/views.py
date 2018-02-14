@@ -470,7 +470,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         for p in t:
             p['rank'] = p['rank'] + rank   
             rank = rank + 1
-        g = sorted(d, key=lambda k: k['rank'])[first_page:page1]
+        g = sorted(t, key=lambda k: k['rank'])[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = g
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
