@@ -460,12 +460,12 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        d = sorted(photos, key=lambda k: k['distance'])
+        d = sorted(photos, key=lambda k: k['timestamp'])
         rank = 0
         for p in d:
             p['rank'] = rank
             rank = rank + 1
-        t = sorted(d, key=lambda k: k['timestamp'])
+        t = sorted(d, key=lambda k: k['photo_distance'])
         rank = 0
         for p in t:
             p['rank'] = p['rank'] + rank   
