@@ -406,6 +406,15 @@ class DeletePhotoViewSet(APIView):
             return Response("failure to delete photo from server", status=status.HTTP_400_BAD_REQUEST)
 
 class BanCheck(APIView):
+
+    def BanCheck(self, request):
+        deviceUUID = request['deviceUUID']
+        user_set = Profile.objects.filter(deviceUUID=deviceUUID)
+        for user in user_set:
+            if user.banned:
+                return True
+        return False
+
     
     def post(self, request):
         deviceUUID = request['deviceUUID']
