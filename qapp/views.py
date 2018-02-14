@@ -416,8 +416,8 @@ class BanCheck(APIView):
         return False
 
     
-    def post(self, request):
-        deviceUUID = request['deviceUUID']
+    def post(self, request, format=None):
+        deviceUUID = request.data['deviceUUID']
         user_set = Profile.objects.filter(deviceUUID=deviceUUID)
         for user in user_set:
             if user.banned:
