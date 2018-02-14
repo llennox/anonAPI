@@ -159,7 +159,7 @@ class AccountCreation(APIView):
            uu = uuid.uuid4()
            user = User.objects.create_user(str(uu), 'anonemail@anonshot.com',  str(uu))
            user.save()
-           profile = Profile.objects.create(user=user, isanon=True, created=False)
+           profile = Profile.objects.create(user=user, isanon=True, created=False, deviceUUID=request.data['deviceUUID'])
            token = AuthToken.objects.create(user)
            serializer = UserSerializer()
            data = serializer.data
