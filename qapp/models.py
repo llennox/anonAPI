@@ -10,6 +10,11 @@ from knox.models import AuthToken
 
 #return created 
 
+class Flag(models.Model):
+    photourl = models.CharField(max_length=255)
+    userurl = models.CharField(max_length=255)
+    flagger = models.CharField(max_length=255)
+
 class Photo(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     lat = models.FloatField()

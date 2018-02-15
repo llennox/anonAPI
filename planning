@@ -46,6 +46,10 @@ curl -H "Authorization: Token 117e27fc0a6f775626cc7e9c35c9c075a73b152a2d70ecd0c0
  
 curl -H "Authorization: Token 10f9bd284a44c5419c73ad5451f37154a58a0937c342ba8707fd6cea2e2b44b6" -F "page=1" -F "lat=12.111111111" -F "lon=12.11111111" -F "username=Anon" -X POST https://anonshot.com/api/user-photos/
 
+ 
+curl -H "Authorization: Token 5252a3287c84fd9e348c4adddc80a46378b1a7ae9e383e787859b8dd5916fa96" -F "userUUID=4ed46d58-5006-4087-b0ae-6178c658bb49" -F "photoUUID=7f07557d-4022-48ad-8732-64d8b65a1d6b" -X POST https://anonshot.com/api/flag-photo/
+
+
 
 
  

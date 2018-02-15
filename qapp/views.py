@@ -4,7 +4,7 @@ from itertools import chain
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
-from qapp.models import Photo, Comments, Profile
+from qapp.models import Photo, Comments, Profile, Flag
 from django.contrib.gis.geoip2 import GeoIP2
 from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
@@ -55,13 +55,14 @@ class FlagPhoto(APIView):
             photo_url = 'https://anonshot.com/photos/%s.jpg' % photo.uuid
         user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
         message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
-        send_mail(
-        'flagged post',
-        message,
-        'gonnellcough@gmail.com',
-        ['gonnellcough@gmail.com']   # later pragmatically change this send function for your moderators
-        )
-        return Response("email sent", status=status.HTTP_200_OK)
+        Flag.objects.create(photourl=photo_url, userurl=user_url, flagger=user.username)
+        #send_mail(
+        #'flagged post',
+        #message,
+        #'gonnellcough@gmail.com',
+        #['gonnellcough@gmail.com']   # later pragmatically change this send function for your moderators
+        #)
+        return Response("success", status=status.HTTP_200_OK)
 
 
 #class logOut(APIView):
