@@ -36,13 +36,32 @@ def api_documentation(request):  ### popup that presents rules.
     
     return render(request, 'api_docs.html') 
 
-class flagPhoto(APIView):   
+class FlagPhoto(APIView):   
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
                               
     def post(self, request, forman=None):
         user = request._auth.user
-        return Response("failed", status=status.HTTP_400_BAD_REQUEST)
+        try:
+            photo = Photo.objects.get(uuid=request.data['photoUUID'])
+            flagged_user = Profile.objects.get(uuid=request.data['userUUID'])
+        except:
+            return Response("photo or user does not exist", status=status.HTTP_400_BAD_REQUEST)
+        photo.visible = False
+        photo.save()
+        if photo.isvideo:
+            photo_url = 'https://anonshot.com/photos/%s.mp4' % photo.uuid
+        else:
+            photo_url = 'https://anonshot.com/photos/%s.jpg' % photo.uuid
+        user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
+        message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
+        send_mail(
+        'flagged post',
+        message,
+        'gonnellcough@gmail.com',
+        ['gonnellcough@gmail.com']   # later pragmatically change this send function for your moderators
+        )
+        return Response("email sent", status=status.HTTP_200_OK)
 
 
 #class logOut(APIView):
@@ -278,18 +297,19 @@ class UserViewSet(APIView):  # need to make a
         if user.username == args[0]:
             photos1 = Photo.objects.filter(useruuid=profile.uuid).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
-            for photo in photos1: # do the haversin and attach comments proly a new litt func 
-                data = {}
-                lat2 = float(photo.lat)
-                lon2 = float(photo.lon)
-                #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-                uuid = photo.uuid
-                comments = Photo.return_comments(uuid)
-                data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+            for photo in photos1: # do the haversin and attach comments proly a new litt func
+                if photo.visible: 
+                    data = {}
+                    lat2 = float(photo.lat)
+                    lon2 = float(photo.lon)
+                    #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                    uuid = photo.uuid
+                    comments = Photo.return_comments(uuid)
+                    data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-                photos.append(data) 
+                    photos.append(data) 
         
             returnphotos = {}
             returnphotos['objects'] = photos
@@ -449,17 +469,18 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         first_page = page1 - 8
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
-            data = {}
-            lat2 = float(photo.lat)
-            lon2 = float(photo.lon)
-            photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-            uuid = photo.uuid
-            comments = Photo.return_comments(uuid)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+            if photo.visible:
+                data = {}
+                lat2 = float(photo.lat)
+                lon2 = float(photo.lon)
+                photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                uuid = photo.uuid
+                comments = Photo.return_comments(uuid)
+                data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
-            photos.append(data)
+                photos.append(data)
         d = sorted(photos, key=lambda k: k['timestamp'])
         rank = 0
         for p in d:
