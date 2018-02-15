@@ -55,7 +55,8 @@ class FlagPhoto(APIView):
             photo_url = 'https://anonshot.com/photos/%s.jpg' % photo.uuid
         user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
         message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
-        Flag.objects.create(photourl=photo_url, userurl=user_url, flagger=user.username)
+        photospecs = 'https://anonshot.com/admin/qapp/photo/%s/change/' % photo.uuid
+        Flag.objects.create(photourl=photo_url, photospecs=photo_specs, userurl=user_url, flagger=user.username)
         #send_mail(
         #'flagged post',
         #message,

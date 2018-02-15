@@ -12,6 +12,7 @@ from knox.models import AuthToken
 
 class Flag(models.Model):
     photourl = models.CharField(max_length=255, default="")
+    photospecs = models.CharField(max_length=255, default="")
     userurl = models.CharField(max_length=255, default="")
     flagger = models.CharField(max_length=255, default="")
 
