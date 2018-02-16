@@ -43,18 +43,23 @@ class FlagPhoto(APIView):
     def post(self, request, forman=None):
         user = request._auth.user
         try:
-            photo = Photo.objects.get(uuid=request.data['photoUUID'])
             flagged_user = Profile.objects.get(uuid=request.data['userUUID'])
+            user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
+            flagger = flagged_user.uuid
         except:
-            return Response("photo or user does not exist", status=status.HTTP_400_BAD_REQUEST)
+            flagger = "DNE"
+            user_url = "DNE"
+        try:
+            photo = Photo.objects.get(uuid=request.data['photoUUID'])
+        except:
+            return Response("photo does not exist", status=status.HTTP_400_BAD_REQUEST)
         photo.visible = False
         photo.save()
         if photo.isvideo:
             photo_url = 'https://anonshot.com/photos/%s.mp4' % photo.uuid
         else:
             photo_url = 'https://anonshot.com/photos/%s.jpg' % photo.uuid
-        user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
-        message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
+        #message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
         photo_specs = 'https://anonshot.com/admin/qapp/photo/%s/change/' % photo.uuid
         Flag.objects.create(photourl=photo_url, photospecs=photo_specs, userurl=user_url, flagger=user.username)
         #send_mail(
