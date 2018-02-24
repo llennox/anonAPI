@@ -34,7 +34,7 @@ import json
 
 def api_documentation(request):  ### popup that presents rules. 
     
-    return render(request, 'api_docs.html') 
+    return render(request, 'link_page.html') 
 
 class FlagPhoto(APIView):   
     authentication_classes = (TokenAuthentication,)
