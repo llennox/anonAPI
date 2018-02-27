@@ -40,7 +40,7 @@ class FlagPhoto(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
                               
-    def post(self, request, forman=None):
+    def post(self, request, format=None):
         user = request._auth.user
         try:
             flagged_user = Profile.objects.get(uuid=request.data['userUUID'])
@@ -70,7 +70,29 @@ class FlagPhoto(APIView):
         #)
         return Response("success", status=status.HTTP_200_OK)
 
+class photosByNewest(APIView):
 
+    def post(self, request, format=None):
+        photos1 = Photo.objects.all()
+        page = int(request.data['page'])
+        page1 = page * 8
+        first_page = page1 - 8
+        photos = []
+        for photo in photos1: # do the haversin and attach comments proly a new litt func 
+            data = {}
+ #add points based number of comments, distance, age order by these
+            uuid = photo.uuid
+            comments = Photo.return_comments(uuid)
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+'caption':photo.caption,'useruuid':photo.useruuid,\
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
+            
+            photos.append(data)
+        t = sorted(photos, key=lambda k: k['timestamp'])[first_page:page1]
+        returnphotos = {}
+        returnphotos['objects'] = t
+        return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
+        
 #class logOut(APIView):
  #   authentication_classes = (TokenAuthentication,)
   #  permission_classes = (IsAuthenticated,)
@@ -85,7 +107,7 @@ class isanonSwitch(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     
-    def post(self, request, forman=None):
+    def post(self, request, format=None):
         user = request._auth.user
         try:
             uuid = request.data['user_uuid']
