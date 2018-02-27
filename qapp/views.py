@@ -71,9 +71,11 @@ class FlagPhoto(APIView):
         return Response("success", status=status.HTTP_200_OK)
 
 class photosByNewest(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, format=None):
-        photos1 = Photo.objects.all()
+        photos1 = Photo.objects.all().order_by('timestamp').reverse()
         page = int(request.data['page'])
         page1 = page * 8
         first_page = page1 - 8
@@ -88,7 +90,7 @@ class photosByNewest(APIView):
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        t = sorted(photos, key=lambda k: k['timestamp'])[first_page:page1]
+        t = photos[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
