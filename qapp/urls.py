@@ -23,7 +23,8 @@ urlpatterns = [
     url(r'^api/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$', views.UserViewSet.as_view(), name='photo'),
     url(r'^api/login/$', views.LILOViewSet.as_view(), name='login'),
     url(r'^api/logout/$', views.LILOViewSet.as_view(), name='logout'),
-    url(r'^$', views.api_documentation, name='api_documentation'),
+    url(r'^privacy/$', views.api_documentation, name='api_documentation'),
+    url(r'^terms/$', views.terms, name='terms'),
     url(r'api/auth/', include('knox.urls'))
 ] 
 

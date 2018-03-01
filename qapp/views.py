@@ -29,7 +29,9 @@ import uuid
 from rest_framework.renderers import JSONRenderer
 import json
 
+def terms(request):  ### popup that presents rules. 
 
+    return render(request, 'terms.html')
 
 
 def api_documentation(request):  ### popup that presents rules. 
