@@ -155,4 +155,211 @@ export const logOutUser = (token) => {
   };
 };
 ```
+### get one photo 
+```javascript 
+export const grabSinglePhoto = (dispatch, uuid, token) => {
+  axios.defaults.headers.common.Authorization = `Token ${token}`;
+ const url = `https://locallensapp.com/api/${uuid}`;
+ axios.get(url)
+ .then(function (response) {
+  const x = { x: response.data };
+  dispatch({ type: LOADING_FALSE });
+  dispatch({ type: REFRESHING_FALSE });
+  dispatch({ type: SINGLE_PHOTO, payload: x });
+})
+.catch(function (error) {
+console.log(error.message);
+});
+};
+```
 
+### post comment
+```javascript
+export const PostComment = (text, token, uuid) => {
+   return (dispatch) => {
+     axios.defaults.headers.common.Authorization = `Token ${token}`;
+   const url = 'https://locallensapp.com/api/comments/';
+   axios.post(url, {
+     comment: text,
+     photouuid: uuid
+   }).then(function (response) {
+     grabSinglePhoto(dispatch, uuid, token);
+   }).catch(function (error) {
+     console.log(error.message);
+   });
+   };
+ };
+```
+
+### delete photo
+```javascript
+ export const deletePhoto = (uuid, token) => {
+     return (dispatch) => {
+       axios.defaults.headers.common.Authorization = `Token ${token}`;
+       const url = 'https://locallensapp.com/api/delete-photo/';
+       axios.post(url,
+         { uuid: uuid
+       }).then(function (response) {
+         dispatch({ type: DELETE_PHOTO, payload: uuid });
+       }).catch(function (error) {
+         console.log(error);
+       });
+     };
+};
+```
+
+### flag photo 
+```javascript
+export const flagPhoto = (photouuid, useruuid, token) => {
+  return (dispatch) => {
+    axios.defaults.headers.common.Authorization = `Token ${token}`;
+     const url = 'https://locallensapp.com/api/flag-photo/';
+    axios.post(url, {
+      photoUUID: photouuid,
+      userUUID: useruuid
+    }).then(function (response) {
+      dispatch({ type: FLAG_PHOTO, payload: photouuid });
+    }).catch(function () {
+        dispatch({ type: FLAG_PHOTO, payload: photouuid });
+    });
+  };
+};
+```
+
+### photos by username
+```javascript
+export const getPhotosByUser = (poster, token, thepage) => {
+  return (dispatch) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        //const lat = 12.11111111111111;
+        //const lon = 12.11111111111111111;
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        axios.defaults.headers.common.Authorization = `Token ${token}`;
+        const url = 'https://locallensapp.com/api/user-photos/';
+        axios.post(url,  {
+          lat: latitude,
+          lon: longitude,
+          username: poster,
+          page: thepage
+        })
+         .then(function (response) {
+          dispatch({ type: USER_PHOTOS, payload: response.data, p: thepage });
+          dispatch({ type: LOADING_FALSE });
+          dispatch({ type: REFRESHING_FALSE });
+          dispatch({ type: ONCE_LOADED_FALSE });
+          Actions.PhotoByUserView();
+       })
+     .catch(function (error) {
+       console.log(error.message);
+     });
+      },
+      (error) => console.log(error.message)
+    );
+  };
+};
+```
+
+### post photo 
+```javascript
+export const PostPhoto = (token, uuid, thecaption, themedia) => {
+
+  return (dispatch) => {
+   dispatch({ type: REFRESHING });
+   dispatch({ type: REF_TEXT, payload: 'uploading photo' });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latt = position.coords.latitude;
+        const lonn = position.coords.longitude;
+
+    RNFetchBlob.fetch('POST', 'https://locallensapp.com/api/photos/', {
+        Authorization: 'Token ' + token,
+        'Content-Type': 'multipart/form-data'
+      }, [
+        { name: 'file',
+        filename: 'placeholder.jpg',
+        type: 'image/jpg',
+        data: RNFetchBlob.wrap(themedia) },
+        {
+          name: 'lat',
+          data: JSON.stringify(
+          latt
+        ) },
+        {
+          name: 'lon',
+          data: JSON.stringify(
+          lonn
+        ) },
+        {
+          name: 'caption',
+          data: thecaption
+        },
+        {
+          name: 'isvideo',
+          data: 'false'
+        }
+      ]).then(() => {
+        dispatch({ type: REF_TEXT, payload: 'getting photos' });
+        getPhotosWithAction(dispatch, token, 1);
+      }).catch(() => {
+        dispatch({ type: REF_TEXT, payload: 'upload failed, returning photos' });
+        getPhotosWithAction(dispatch, token, 1);
+      });
+    },
+    (error) => console.log(error.message)
+  );
+  };
+};
+```
+
+### post video 
+```javascript
+export const PostVideo = (token, uuid, thecaption, themedia) => {
+  return (dispatch) => {
+  dispatch({ type: REFRESHING });
+  dispatch({ type: REF_TEXT, payload: 'uploading video' });
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const latt = position.coords.latitude;
+        const lonn = position.coords.longitude;
+
+    RNFetchBlob.fetch('POST', 'https://locallensapp.com/api/photos/', {
+        Authorization: 'Token ' + token
+        }, [
+        { name: 'file',
+        filename: 'placeholder.mp4',
+        type: 'video/mp4',
+        data: RNFetchBlob.wrap(themedia) },
+        {
+          name: 'lat',
+          data: JSON.stringify(
+          latt
+        ) },
+        {
+          name: 'lon',
+          data: JSON.stringify(
+          lonn
+        ) },
+        {
+          name: 'caption',
+          data: thecaption
+        },
+        {
+          name: 'isvideo',
+          data: 'True'
+        }
+      ]).then(() => {
+        //dispatch({ type: SET_DEFAULT });
+        dispatch({ type: REF_TEXT, payload: 'getting photos' });
+        getPhotosWithAction(dispatch, token, 1);
+      }).catch(() => {
+        dispatch({ type: REF_TEXT, payload: 'upload failed, returning photos' });
+        getPhotosWithAction(dispatch, token, 1);
+      });
+    },
+    (error) => console.log(error.message)
+  );
+  };
+};
+```
