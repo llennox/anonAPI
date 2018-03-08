@@ -297,11 +297,11 @@ class ReturnUserPhotos(APIView):
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
             photo.distance = PhotoViewSet.haversine(self, lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-            lat2 = format(lat2, '.5f')
-            lon2 = format(lon2, '.5f')
+            lat = round(photo.lat, 6)
+            lon = round(photo.lon, 6) 
             uuid = photo.uuid
             comments = Photo.return_comments(uuid)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
@@ -349,11 +349,11 @@ class UserViewSet(APIView):  # need to make a
                     lat2 = float(photo.lat)
                     lon2 = float(photo.lon)
                     photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-                    lat2 = format(lat2, '.5f')
-                    lon2 = format(lon2, '.5f')
+                    lat = round(photo.lat, 6)
+                    lon = round(photo.lon, 6) 
                     uuid = photo.uuid
                     comments = Photo.return_comments(uuid)
-                    data={'uuid':photo.uuid,'lat':photo.lat, 'photo_distance': photo.distance,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                    data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
@@ -381,12 +381,12 @@ class UserViewSet(APIView):  # need to make a
                 lat2 = float(photo.lat)
                 lon2 = float(photo.lon)
                 photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-                lat2 = format(lat2, '.5f')
-                lon2 = format(lon2, '.5f')
+                lat = round(photo.lat, 6)
+                lon = round(photo.lon, 6) 
 
                 uuid = photo.uuid
                 comments = Photo.return_comments(uuid)
-                data={'uuid':photo.uuid,'lat':photo.lat, 'photo_distance': photo.distance,'lon':photo.lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
