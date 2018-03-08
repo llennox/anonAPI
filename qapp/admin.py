@@ -7,7 +7,7 @@ class PhotoAdmin(admin.ModelAdmin):
 admin.site.register(Photo, PhotoAdmin)
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('created' , 'user')
+    list_display = ('created')
 admin.site.register(Profile, ProfileAdmin)
 
 class CommentAdmin(admin.ModelAdmin):
