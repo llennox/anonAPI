@@ -296,7 +296,7 @@ class ReturnUserPhotos(APIView):
             data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
-            photo.distance = PhotoViewSet.haversine(self, lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+            photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             lat = round(photo.lat, 6)
             lon = round(photo.lon, 6) 
             uuid = photo.uuid
