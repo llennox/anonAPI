@@ -28,6 +28,11 @@ from rest_framework.settings import api_settings
 import uuid
 from rest_framework.renderers import JSONRenderer
 import json
+from django.conf import settings
+
+def main(request):
+    with open('/home/connlloc/sites/q/local_lens/build/index.html') as f:
+        return HttpResponse(f.read())   
 
 def terms(request):  ### popup that presents rules. 
 
@@ -46,7 +51,7 @@ class FlagPhoto(APIView):
         user = request._auth.user
         try:
             flagged_user = Profile.objects.get(uuid=request.data['userUUID'])
-            user_url = 'https://anonshot.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
+            user_url = 'https://locallensapp.com/admin/qapp/profile/%s/change/' % flagged_user.uuid
             flagger = flagged_user.uuid
         except:
             flagger = "DNE"
@@ -58,11 +63,11 @@ class FlagPhoto(APIView):
         photo.visible = False
         photo.save()
         if photo.isvideo:
-            photo_url = 'https://anonshot.com/photos/%s.mp4' % photo.uuid
+            photo_url = 'https://locallensapp.com/photos/%s.mp4' % photo.uuid
         else:
-            photo_url = 'https://anonshot.com/photos/%s.jpg' % photo.uuid
+            photo_url = 'https://locallensapp.com/photos/%s.jpg' % photo.uuid
         #message = 'flagged photo: %s \n flagged user: %s' % (photo_url, user_url)
-        photo_specs = 'https://anonshot.com/admin/qapp/photo/%s/change/' % photo.uuid
+        photo_specs = 'https://locallensapp.com/admin/qapp/photo/%s/change/' % photo.uuid
         Flag.objects.create(photourl=photo_url, photospecs=photo_specs, userurl=user_url, flagger=user.username)
         #send_mail(
         #'flagged post',
@@ -76,7 +81,7 @@ class photosByNewest(APIView):
 
 
     def post(self, request, format=None):
-        photos1 = Photo.objects.all().order_by('timestamp').reverse()
+        photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
         page = int(request.data['page'])
         page1 = page * 8
         first_page = page1 - 8
@@ -273,7 +278,7 @@ class ReturnUserPhotos(APIView):
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
         #
         user = request._auth.user
-        photos1 = Photo.objects.filter(poster=request.data['username'])
+        photos1 = Photo.objects.filter(poster=request.data['username']).order_by('timestamp').reverse()
         lat1 = float(request.data['lat'])
         lon1 = float(request.data['lon'])
         page = int(request.data['page'])
@@ -292,7 +297,7 @@ class ReturnUserPhotos(APIView):
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
             photos.append(data)
-        t = sorted(photos, key=lambda k: k['timestamp'])[first_page:page1]
+        t = photos[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
@@ -513,17 +518,17 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
                 photos.append(data)
-        d = sorted(photos, key=lambda k: k['timestamp'])
+        #d = sorted(photos, key=lambda k: k['timestamp'])
+        #rank = 0
+        #for p in d:
+            #p['rank'] = rank
+            #rank = rank + 1
+        t = sorted(photos, key=lambda k: k['photo_distance'])
         rank = 0
-        for p in d:
-            p['rank'] = rank
-            rank = rank + 1
-        t = sorted(d, key=lambda k: k['photo_distance'])
-        rank = 0
-        for p in t:
-            p['rank'] = p['rank'] + rank   
-            rank = rank + 1
-        g = sorted(t, key=lambda k: k['rank'])[first_page:page1]
+        #for p in t:
+        #    p['rank'] = p['rank'] + rank   
+        #    rank = rank + 1
+        g = t[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = g
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})

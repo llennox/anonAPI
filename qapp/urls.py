@@ -5,6 +5,7 @@ from rest_framework import routers
 
 
 urlpatterns = [
+    url(r'^$', views.main, name='main'),
     url(r'^api/isanonSwitch/$', views.isanonSwitch.as_view(), name='isanonSwitch'),
     url(r'^api/photos-by-newest/$', views.photosByNewest.as_view(), name='photosByNewest'),
     url(r'^api/ban-check/$', views.BanCheck.as_view(), name='BanCheck'),
