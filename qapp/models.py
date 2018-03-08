@@ -9,7 +9,10 @@ from django.dispatch import receiver
 from knox.models import AuthToken
 
 #return created 
-
+class Block(models.Model):
+    blocker = models.CharField(max_length=255, default="")
+    blockee = models.CharField(max_length=255, default="")
+    
 class Flag(models.Model):
     photourl = models.CharField(max_length=255, default="")
     photospecs = models.CharField(max_length=255, default="")

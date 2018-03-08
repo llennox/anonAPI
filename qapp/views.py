@@ -43,6 +43,13 @@ def api_documentation(request):  ### popup that presents rules.
     
     return render(request, 'link_page.html') 
 
+class blockUser(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+ 
+    def post(self, request, format=None):
+        return Response("success", status=status.HTTP_200_OK)
+
 class FlagPhoto(APIView):   
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
