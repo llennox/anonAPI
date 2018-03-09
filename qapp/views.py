@@ -53,10 +53,12 @@ class blockUser(APIView):
             blockee = Profile.objects.get(uuid=request.data['user_uuid'])
             blocker = Profile.objects.get(user=user)
             Block.objects.create(blocker=blocker.deviceUUID, blockee=blockee.deviceUUID)
+            Block.save()
+            return Response("success", status=status.HTTP_200_OK)
         except:
             blocker = "DNE"
             blockee = "DNE"
-            return Response("photo does not exist", status=status.HTTP_400_BAD_REQUEST)
+            return Response(request.data['user_uuid'], status=status.HTTP_200_OK)
         return Response("success", status=status.HTTP_200_OK)
 
 class FlagPhoto(APIView):   
@@ -294,6 +296,7 @@ class ReturnUserPhotos(APIView):
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
         #
         user = request._auth.user
+        profile = Profile.objects.get(user=user)
         photos1 = Photo.objects.filter(poster=request.data['username']).order_by('timestamp').reverse()
         lat1 = float(request.data['lat'])
         lon1 = float(request.data['lon'])
@@ -309,7 +312,7 @@ class ReturnUserPhotos(APIView):
             lat = round(photo.lat, 6)
             lon = round(photo.lon, 6) 
             uuid = photo.uuid
-            comments = Photo.return_comments(uuid)
+            comments = Photo.return_comments(uuid, profile.deviceUUID)
             data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
@@ -361,7 +364,7 @@ class UserViewSet(APIView):  # need to make a
                     lat = round(photo.lat, 6)
                     lon = round(photo.lon, 6) 
                     uuid = photo.uuid
-                    comments = Photo.return_comments(uuid)
+                    comments = Photo.return_comments(uuid, profile.deviceUUID)
                     data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
@@ -374,7 +377,7 @@ class UserViewSet(APIView):  # need to make a
         try: 
             photo = Photo.objects.get(uuid=args[0])
             uuid = args[0]
-            comments = Photo.return_comments(uuid)  
+            comments = Photo.return_comments(uuid, profile.deviceUUID)  
             data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}  
@@ -394,7 +397,7 @@ class UserViewSet(APIView):  # need to make a
                 lon = round(photo.lon, 6) 
 
                 uuid = photo.uuid
-                comments = Photo.return_comments(uuid)
+                comments = Photo.return_comments(uuid, profile.deviceUUID)
                 data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
@@ -521,6 +524,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 # then find all comments attached to those photos and assign point system based on date published distance to user and comments 
     
         user = request._auth.user
+        profile = Profile.objects.get(user=user)
         photos1 = self.returnObjects(*args)
         lat1 = float(args[0])
         lon1 = float(args[1])
@@ -537,7 +541,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                 lat = round(photo.lat, 6)
                 lon = round(photo.lon, 6)            
                 uuid = photo.uuid
-                comments = Photo.return_comments(uuid)
+                comments = Photo.return_comments(uuid, profile.deviceUUID)
                 data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}

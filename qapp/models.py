@@ -29,8 +29,14 @@ class Photo(models.Model):
     caption = models.CharField(max_length=255, default="")
     useruuid = models.UUIDField()
     isvideo = models.BooleanField(default=False)
-    def return_comments(self):
+ 
+    def return_comments(self, blocker_deviceUUID):
+        blocks = Block.objects.filter(blocker=blocker_deviceUUID)
         comments = Comments.objects.filter(photouuid=self).order_by('timestamp')
+        for block in blocks:
+            profiles = Profile.objects.filter(deviceUUID=block.blockee)
+            for profile in profiles:
+                comments.exclude(useruuid=profile.uuid)
         return comments
 
 class Comments(models.Model):
