@@ -4,7 +4,7 @@ from itertools import chain
 from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
-from qapp.models import Photo, Comments, Profile, Flag
+from qapp.models import Photo, Comments, Profile, Flag, Block
 from django.contrib.gis.geoip2 import GeoIP2
 from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
@@ -48,6 +48,15 @@ class blockUser(APIView):
     permission_classes = (IsAuthenticated,)
  
     def post(self, request, format=None):
+        user = request._auth.user
+        try:
+            blockee = Profile.objects.get(uuid=request.data['user_uuid'])
+            blocker = Profile.objects.get(user=user)
+            Block.objects.create(blocker=blocker.deviceUUID, blockee=blockee.deviceUUID)
+        except:
+            blocker = "DNE"
+            blockee = "DNE"
+            return Response("photo does not exist", status=status.HTTP_400_BAD_REQUEST)
         return Response("success", status=status.HTTP_200_OK)
 
 class FlagPhoto(APIView):   
