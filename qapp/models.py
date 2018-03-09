@@ -36,7 +36,7 @@ class Photo(models.Model):
         for block in blocks:
             profiles = Profile.objects.filter(deviceUUID=block.blockee)
             for profile in profiles:
-                comments.exclude(useruuid=profile.uuid)
+                comments = comments.exclude(useruuid=profile.uuid)
         return comments
 
 class Comments(models.Model):

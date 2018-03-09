@@ -533,7 +533,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         first_page = page1 - 8
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
-            if photo.visible:
+            if photo.visible and self.blockCheck(photo.useruuid, profile.deviceUUID) == True:
                 data = {}
                 lat2 = float(photo.lat)
                 lon2 = float(photo.lon)
@@ -547,6 +547,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
                 photos.append(data)
+        
+        
         #d = sorted(photos, key=lambda k: k['timestamp'])
         #rank = 0
         #for p in d:
@@ -563,7 +565,13 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
 
-
+    def blockCheck(self, useruuid, deviceUUID):
+        profiles = Profile.objects.filter(uuid=useruuid)
+        for profile in profiles:
+            if Block.objects.filter(blockee=profile.deviceUUID, blocker=deviceUUID).exists():
+                return False
+        return True
+            
 
 
     def haversine(self, lon1, lat1, lon2, lat2):
