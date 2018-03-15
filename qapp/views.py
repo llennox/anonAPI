@@ -30,27 +30,23 @@ from rest_framework.renderers import JSONRenderer
 import json
 from django.conf import settings
 
-
-
-
-
 def main(request):
     with open('/home/connlloc/sites/q/local_lens/build/index.html') as f:
-        return HttpResponse(f.read())   
+        return HttpResponse(f.read())
 
-def terms(request):  ### popup that presents rules. 
+def terms(request):  ### popup that presents rules.
 
     return render(request, 'terms.html')
 
 
-def api_documentation(request):  ### popup that presents rules. 
-    
-    return render(request, 'link_page.html') 
+def api_documentation(request):  ### popup that presents rules.
+
+    return render(request, 'link_page.html')
 
 class blockUser(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
- 
+
     def post(self, request, format=None):
         user = request._auth.user
         try:
@@ -65,10 +61,10 @@ class blockUser(APIView):
             return Response(request.data['user_uuid'], status=status.HTTP_200_OK)
         return Response("success", status=status.HTTP_200_OK)
 
-class FlagPhoto(APIView):   
+class FlagPhoto(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-                              
+
     def post(self, request, format=None):
         user = request._auth.user
         try:
@@ -104,25 +100,29 @@ class photosByNewest(APIView):
 
     def post(self, request, format=None):
         photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
-        page = int(request.data['page'])
-        page1 = page * 8
-        first_page = page1 - 8
+        if request.data['page']:
+            page = int(request.data['page'])
+            page1 = page * 8
+            first_page = page1 - 8
         photos = []
-        for photo in photos1: # do the haversin and attach comments proly a new litt func 
+        for photo in photos1: # do the haversin and attach comments proly a new litt func
             data = {}
  #add points based number of comments, distance, age order by these
             uuid = photo.uuid
             comments = Photo.return_comments(uuid)
             data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
-'caption':photo.caption,'useruuid':photo.useruuid,\
+'caption':photo.caption,'useruuid':photo.useruuid, 'photo_distance': 'n/a'\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
-            
+
             photos.append(data)
-        t = photos[first_page:page1]
+        if request.data['map']:
+            t = photos
+        else:
+            t = photos[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
-        
+
 #class logOut(APIView):
  #   authentication_classes = (TokenAuthentication,)
   #  permission_classes = (IsAuthenticated,)
@@ -130,13 +130,13 @@ class photosByNewest(APIView):
    # def post(self, request, format=None):
     #    user = request._auth.user
      #   try:
-                
+
 
 
 class isanonSwitch(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    
+
     def post(self, request, format=None):
         user = request._auth.user
         try:
@@ -169,7 +169,7 @@ class ChangeUsername(APIView):
             newpassword = request.data['newpassword']
         except:
             newpassword = None
-        try: 
+        try:
             newemail = request.data['newemail']
         except:
             newemail = None
@@ -186,23 +186,23 @@ class ChangeUsername(APIView):
                 return Response("that email or username is already in use", status=status.HTTP_400_BAD_REQUEST)
             user.set_password(newpassword)
             user.save()
-            profile.save()   
+            profile.save()
             serializer = UserSerializer()
             data = serializer.data
             user.auth_token_set.all().delete()
-            token = AuthToken.objects.create(user)  
+            token = AuthToken.objects.create(user)
             data['created'] = True
             data['username'] = newusername
             data['token'] = token
             data['password']= newpassword
             data['user_uuid']= profile.uuid
-            return Response(data, status=status.HTTP_201_CREATED)       
-            
+            return Response(data, status=status.HTTP_201_CREATED)
+
         elif newusername != None:
             if User.objects.filter(username=newusername).exclude(username=user.username).exists():
                 return Response("that username is taken", status=status.HTTP_400_BAD_REQUEST)
             user.username = newusername
-            
+
             user.save()
             return Response("username changed", status=status.HTTP_201_CREATED)
         elif newemail != None:
@@ -222,16 +222,16 @@ class ChangePassword(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, format=None): # send an email write a get this is password/username recovery
-        user = request._auth.user  
+        user = request._auth.user
 
         if request.data['email'] == user.email:
-            print('######SSSSSSSEEEEND AN EMAIL') 
+            print('######SSSSSSSEEEEND AN EMAIL')
             return Response("comment updated", status=status.HTTP_201_CREATED)
         return Response("comment updated", status=status.HTTP_400_BAD_REQUEST)
 
-class AccountCreation(APIView):   
-   
-    def post(self, request, format=None): # user creation return token and log in 
+class AccountCreation(APIView):
+
+    def post(self, request, format=None): # user creation return token and log in
 
         try:
            uu = uuid.uuid4()
@@ -253,16 +253,16 @@ class AccountCreation(APIView):
 
 class LILOViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)    
+    permission_classes = (IsAuthenticated,)
 
 
     def post(self, request, format=None):# refreshes token changes isanon
     #   olduser = User.objects.get(username=request.data['username'])
         olduser = request._auth.user
         username = request.data['username']
-        password = request.data['password'] 
-        user = User.objects.get(username=username) 
-        
+        password = request.data['password']
+        user = User.objects.get(username=username)
+
         if user.check_password(password):
             user.is_active = True
             user.save()
@@ -270,7 +270,7 @@ class LILOViewSet(APIView):
             profile.isanon = False
             profile.save()
             user = authenticate(username=username, password=password)
-            login(request, user)  
+            login(request, user)
             user.auth_token_set.all().delete()
             token = AuthToken.objects.create(user)
             oldprofile = Profile.objects.get(user=olduser)
@@ -285,11 +285,11 @@ class LILOViewSet(APIView):
         else:
             return HttpResponse('wrong username or password', status=status.HTTP_400_BAD_REQUEST)
 
-    
+
 
     def get(self, request, *args, format=None): # this doesn't work. doesn't really matter cause we can delete key on the phone side \
         return HttpResponse('user has been logged out', status=status.HTTP_202_ACCEPTED)
-        
+
 
 class ReturnUserPhotos(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -297,7 +297,7 @@ class ReturnUserPhotos(APIView):
 
     def post(self, request, format=None):# return 60~ photos close to current gps give photos a points value I guess, return comments
         # first query database find gps data closest to users then retrieve the 60 most similar going up and down
-# then find all comments attached to those photos and assign point system based on date published distance to user and comments 
+# then find all comments attached to those photos and assign point system based on date published distance to user and comments
         #
         user = request._auth.user
         profile = Profile.objects.get(user=user)
@@ -308,32 +308,31 @@ class ReturnUserPhotos(APIView):
         page1 = page * 8
         first_page = page1 - 8
         photos = []
-        for photo in photos1: # do the haversin and attach comments proly a new litt func 
- 
+        for photo in photos1: # do the haversin and attach comments proly a new litt func
             data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
             #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             lat = round(photo.lat, 6)
-            lon = round(photo.lon, 6) 
+            lon = round(photo.lon, 6)
             uuid = photo.uuid
             comments = Photo.return_comments(uuid, profile.deviceUUID)
             data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
-            
+
             photos.append(data)
         t = photos[first_page:page1]
         returnphotos = {}
         returnphotos['objects'] = t
         return Response(returnphotos, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
-  
+
 class UserViewSet(APIView):  # need to make a
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    
+
     def put(self, request, *args, format=None):# change password or username make this more secure in the future
         user = request._auth.user
         if args[0] == user.username and user.check_password(request.data['password']) == True:
@@ -344,7 +343,7 @@ class UserViewSet(APIView):  # need to make a
             return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, format=None):
-        
+
         user = request._auth.user
         if args[0] == user.username and user.check_password(request.data['password']) == True:
             user.is_active = False
@@ -352,70 +351,69 @@ class UserViewSet(APIView):  # need to make a
             return Response('user has been made inactive', status=status.HTTP_202_ACCEPTED)
         else:
             return Response('username and authtoken and or password do not match', status=status.HTTP_400_BAD_REQUEST)
- 
+
     def get(self, request, *args, format=None): # if arg is uuid return photo if arg is username return users photos
-        user = request._auth.user 
+        user = request._auth.user
         profile = Profile.objects.get(user=user)
-        photos = []  # fix this please 
+        photos = []  # fix this please
         if user.username == args[0]:
             photos1 = Photo.objects.filter(useruuid=profile.uuid).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
             for photo in photos1: # do the haversin and attach comments proly a new litt func
-                if photo.visible and PhotosViewSet.blockCheck(self, photo.useruuid, profile.deviceUUID) == True:
+                if photo.visible:
                     data = {}
                     lat2 = float(photo.lat)
                     lon2 = float(photo.lon)
                     photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
                     lat = round(photo.lat, 6)
-                    lon = round(photo.lon, 6) 
+                    lon = round(photo.lon, 6)
                     uuid = photo.uuid
                     comments = Photo.return_comments(uuid, profile.deviceUUID)
                     data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-                    photos.append(data) 
-        
+                    photos.append(data)
+
             returnphotos = {}
             returnphotos['objects'] = photos
             return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
-        try: 
+        try:
             photo = Photo.objects.get(uuid=args[0])
             uuid = args[0]
-            comments = Photo.return_comments(uuid, profile.deviceUUID)  
+            comments = Photo.return_comments(uuid, profile.deviceUUID)
             data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance': 'n/a',\
-'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}  
+'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             return Response(data, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         except Photo.DoesNotExist:
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
-        try: 
+        try:
             user = User.objects.get(username=args[0])
             photos1 = Photo.objects.filter(useruuid=profile.uuid, poster=user.username).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
             for photo in photos1: # do the haversin and attach comments proly a new litt func
-                if photo.visible and PhotoViewSet.blockCheck(self, photo.useruuid, profile.deviceUUID) == True:
-                    data = {}
-                    lat2 = float(photo.lat)
-                    lon2 = float(photo.lon)
-                    photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-                    lat = round(photo.lat, 6)
-                    lon = round(photo.lon, 6) 
+                data = {}
+                lat2 = float(photo.lat)
+                lon2 = float(photo.lon)
+                photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                lat = round(photo.lat, 6)
+                lon = round(photo.lon, 6)
 
-                    uuid = photo.uuid
-                    comments = Photo.return_comments(uuid, profile.deviceUUID)
-                    data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                uuid = photo.uuid
+                comments = Photo.return_comments(uuid, profile.deviceUUID)
+                data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-                photos.append(data) 
-        
-                returnphotos = {}
-                returnphotos['objects'] = photos
-                return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
+            photos.append(data)
+
+            returnphotos = {}
+            returnphotos['objects'] = photos
+            return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         except User.DoesNotExist:
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
-        else: 
+        else:
             return Response("photo or user not found", status=status.HTTP_400_BAD_REQUEST)
 
 class CommentViewSet(APIView):
@@ -424,7 +422,7 @@ class CommentViewSet(APIView):
 
     def post(self, request, format=None):
         user = request._auth.user
-        
+
         try:
             user = request.user
             profile = Profile.objects.get(user=user)
@@ -435,16 +433,16 @@ class CommentViewSet(APIView):
         data['useruuid'] = str(profile.uuid)
         if profile.isanon == True:
             data['poster'] = 'anon'
-        else: 
+        else:
             data['poster'] = user.username
-        serializer = CommentsSerializer(data=data)           
-        if serializer.is_valid(): 
+        serializer = CommentsSerializer(data=data)
+        if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def delete(self, request, format=None): 
+    def delete(self, request, format=None):
         user = request._auth.user
         profile = Profile.objects.get(user=user)
         try:
@@ -467,7 +465,7 @@ class CommentViewSet(APIView):
             return Response("comment updated", status=status.HTTP_201_CREATED)
         else:
             return Response("user does not own comment", status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 class DeletePhotoViewSet(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -504,7 +502,7 @@ class BanCheck(APIView):
                 return True
         return False
 
-    
+
     def post(self, request, format=None):
         deviceUUID = request.data['deviceUUID']
         user_set = Profile.objects.filter(deviceUUID=deviceUUID)
@@ -514,7 +512,7 @@ class BanCheck(APIView):
         return Response(False, status=status.HTTP_202_ACCEPTED)
 
 
-class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users. 
+class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in users.
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
@@ -527,8 +525,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 
     def get(self, request, *args, format=None):# return 60~ photos close to current gps give photos a points value I guess, return comments
         # first query database find gps data closest to users then retrieve the 60 most similar going up and down
-# then find all comments attached to those photos and assign point system based on date published distance to user and comments 
-    
+# then find all comments attached to those photos and assign point system based on date published distance to user and comments
+
         user = request._auth.user
         profile = Profile.objects.get(user=user)
         photos1 = self.returnObjects(*args)
@@ -538,22 +536,23 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         page1 = page * 8
         first_page = page1 - 8
         photos = []
-        for photo in photos1: # do the haversin and attach comments proly a new litt func 
+        for photo in photos1: # do the haversin and attach comments proly a new litt func
             if photo.visible and self.blockCheck(photo.useruuid, profile.deviceUUID) == True:
                 data = {}
                 lat2 = float(photo.lat)
                 lon2 = float(photo.lon)
                 photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
                 lat = round(photo.lat, 6)
-                lon = round(photo.lon, 6)            
+                lon = round(photo.lon, 6)
                 uuid = photo.uuid
                 comments = Photo.return_comments(uuid, profile.deviceUUID)
                 data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
-            
+
                 photos.append(data)
-                
+
+
         #d = sorted(photos, key=lambda k: k['timestamp'])
         #rank = 0
         #for p in d:
@@ -562,7 +561,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         t = sorted(photos, key=lambda k: k['photo_distance'])
         rank = 0
         #for p in t:
-        #    p['rank'] = p['rank'] + rank   
+        #    p['rank'] = p['rank'] + rank
         #    rank = rank + 1
         g = t[first_page:page1]
         returnphotos = {}
@@ -576,15 +575,15 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             if Block.objects.filter(blockee=profile.deviceUUID, blocker=deviceUUID).exists():
                 return False
         return True
-            
+
 
 
     def haversine(self, lon1, lat1, lon2, lat2):
-        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2]) 
-        dlon = lon2 - lon1 
-        dlat = lat2 - lat1 
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
         a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-        c = 2 * asin(sqrt(a)) 
+        c = 2 * asin(sqrt(a))
         r = 6371 # Radius of earth in kilometers. Use 3956 for miles
         distance = c * r
         stringDistance = str(distance)
@@ -596,10 +595,10 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
     def returnObject(self, *args):
         uuid = args[0]
         photo = Photo.objects.get(uuid=uuid)
-        return photo 
+        return photo
 
 
-    def returnObjects(self, *args):  
+    def returnObjects(self, *args):
         lat = float(args[0])
         lon = float(args[1])
         lat = int(lat)
@@ -610,9 +609,9 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         lonp = lon + 1
         lonm = lon -1
         photos = Photo.objects.filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
-        return photos# attach comments and do the haversine 
-        #for arg in *args search query database for ex. 32.32*, 23.23* if .count() >= 60: otherfunc(query) else query for 32.3*, 23.2*  
-        # and so on and so forth 
+        return photos# attach comments and do the haversine
+        #for arg in *args search query database for ex. 32.32*, 23.23* if .count() >= 60: otherfunc(query) else query for 32.3*, 23.2*
+        # and so on and so forth
 
 
 
@@ -628,16 +627,16 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             request.data['isvideo'] = True
         else:
             request.data['isvideo'] = False
-        request.data['visible'] = True 
+        request.data['visible'] = True
         #self.roundgps('lon' ,request)
         #self.roundgps('lat' ,request)
         serializer = PhotoSerializer(data=request.data)
         print(serializer.initial_data)
-        if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo 
+        if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo
             serializer.save()
             uuid = serializer.data['uuid']
             f=request.data['file']
-           
+
             try:
                 if request.data['isvideo'] == True:
                     destination=open('/home/connlloc/sites/q/photos/%s.mp4' % uuid, 'wb+')
@@ -651,10 +650,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                     for chunk in f.chunks():
                         destination.write(chunk) ####delete this later writes photos to memory
                     destination.close()
-                 
-#output = client.check('nudity','wad','offensive','scammers').set_url('https://d3m9459r9kwism.cloudfront.net/img/examples/example7.jpg')
                 else:
-                    return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)  
+                    return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
             except:
                 Photo.objects.get(uuid=uuid).delete()
                 return Response("fail", status=status.HTTP_400_BAD_REQUEST)
@@ -662,9 +659,6 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             return Response(data, status=status.HTTP_201_CREATED)
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
 
-    def sightEngine(self, url):
-        client = SightengineClient('321241780', 'u5gzvu4RFnrqdRGtfM9M')
-        output = client.check('nudity','wad','offensive','scammers').set_url(url)
 
     def clean_content(self, form):
         content = form.cleaned_data['photo']
@@ -678,11 +672,11 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         return content
 
     def roundGET(self, var, n):
-        wasNegative = False 
+        wasNegative = False
         var = float(var)
         if var < 0:
             var = var * -1
-            wasNegative = True 
+            wasNegative = True
         var = math.floor(var * 10 ** n) / 10 ** n
         if wasNegative == True:
             var = var * -1
@@ -697,14 +691,14 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         except:
             raise Exception
             return HttpResponse(status=500)
-           
+
     def roundgps(self, fl, request):
         var = request.data[fl]
         var = float(var)
-        wasNegative = False 
+        wasNegative = False
         if var < 0:
             var = var * -1
-            wasNegative = True 
+            wasNegative = True
         var = math.floor(var * 10 ** 5) / 10 ** 5
         if wasNegative == True:
             var = var * -1
@@ -715,7 +709,3 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         else:
             request.data[fl]='fail'
             return request
-
-
-
-
