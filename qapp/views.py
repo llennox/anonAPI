@@ -30,6 +30,10 @@ from rest_framework.renderers import JSONRenderer
 import json
 from django.conf import settings
 
+
+
+
+
 def main(request):
     with open('/home/connlloc/sites/q/local_lens/build/index.html') as f:
         return HttpResponse(f.read())   
@@ -305,6 +309,7 @@ class ReturnUserPhotos(APIView):
         first_page = page1 - 8
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func 
+ 
             data = {}
             lat2 = float(photo.lat)
             lon2 = float(photo.lon)
@@ -356,7 +361,7 @@ class UserViewSet(APIView):  # need to make a
             photos1 = Photo.objects.filter(useruuid=profile.uuid).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
             for photo in photos1: # do the haversin and attach comments proly a new litt func
-                if photo.visible: 
+                if photo.visible and PhotosViewSet.blockCheck(self, photo.useruuid, profile.deviceUUID) == True:
                     data = {}
                     lat2 = float(photo.lat)
                     lon2 = float(photo.lon)
@@ -388,25 +393,26 @@ class UserViewSet(APIView):  # need to make a
             user = User.objects.get(username=args[0])
             photos1 = Photo.objects.filter(useruuid=profile.uuid, poster=user.username).order_by('timestamp')
             serializer = PhotoSerializer(photos, many=True)
-            for photo in photos1: # do the haversin and attach comments proly a new litt func 
-                data = {}
-                lat2 = float(photo.lat)
-                lon2 = float(photo.lon)
-                photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
-                lat = round(photo.lat, 6)
-                lon = round(photo.lon, 6) 
+            for photo in photos1: # do the haversin and attach comments proly a new litt func
+                if photo.visible and PhotoViewSet.blockCheck(self, photo.useruuid, profile.deviceUUID) == True:
+                    data = {}
+                    lat2 = float(photo.lat)
+                    lon2 = float(photo.lon)
+                    photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
+                    lat = round(photo.lat, 6)
+                    lon = round(photo.lon, 6) 
 
-                uuid = photo.uuid
-                comments = Photo.return_comments(uuid, profile.deviceUUID)
-                data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                    uuid = photo.uuid
+                    comments = Photo.return_comments(uuid, profile.deviceUUID)
+                    data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
-            photos.append(data) 
+                photos.append(data) 
         
-            returnphotos = {}
-            returnphotos['objects'] = photos
-            return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
+                returnphotos = {}
+                returnphotos['objects'] = photos
+                return Response(returnphotos, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
         except User.DoesNotExist:
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
         else: 
@@ -547,8 +553,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             
                 photos.append(data)
-        
-        
+                
         #d = sorted(photos, key=lambda k: k['timestamp'])
         #rank = 0
         #for p in d:
@@ -646,6 +651,8 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                     for chunk in f.chunks():
                         destination.write(chunk) ####delete this later writes photos to memory
                     destination.close()
+                 
+#output = client.check('nudity','wad','offensive','scammers').set_url('https://d3m9459r9kwism.cloudfront.net/img/examples/example7.jpg')
                 else:
                     return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)  
             except:
@@ -655,6 +662,9 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             return Response(data, status=status.HTTP_201_CREATED)
         return Response("data sent is not valid", status=status.HTTP_400_BAD_REQUEST)
 
+    def sightEngine(self, url):
+        client = SightengineClient('321241780', 'u5gzvu4RFnrqdRGtfM9M')
+        output = client.check('nudity','wad','offensive','scammers').set_url(url)
 
     def clean_content(self, form):
         content = form.cleaned_data['photo']
