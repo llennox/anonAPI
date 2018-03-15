@@ -308,8 +308,6 @@ class ReturnUserPhotos(APIView):
         user = request._auth.user
         profile = Profile.objects.get(user=user)
         photos1 = Photo.objects.filter(poster=request.data['username']).order_by('timestamp').reverse()
-        lat1 = float(request.data['lat'])
-        lon1 = float(request.data['lon'])
         page = int(request.data['page'])
         page1 = page * 8
         first_page = page1 - 8
