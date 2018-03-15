@@ -612,7 +612,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
         latm = lat - 1
         lonp = lon + 1
         lonm = lon -1
-        photos = Photo.objects.filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
+        photos = Photo.objects.all()#filter(lat__lte=latp, lon__lte=lonp,lat__gte=latm,lon__gte=lonm)
         return photos# attach comments and do the haversine
         #for arg in *args search query database for ex. 32.32*, 23.23* if .count() >= 60: otherfunc(query) else query for 32.3*, 23.2*
         # and so on and so forth
