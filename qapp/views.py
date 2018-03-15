@@ -115,8 +115,10 @@ class photosByNewest(APIView):
             data = {}
  #add points based number of comments, distance, age order by these
             uuid = photo.uuid
+            lat = round(photo.lat, 6)
+            lon = round(photo.lon, 6)
             comments = Photo.return_comments(uuid, profile.deviceUUID)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid, 'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
@@ -314,8 +316,6 @@ class ReturnUserPhotos(APIView):
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func
             data = {}
-            lat2 = float(photo.lat)
-            lon2 = float(photo.lon)
             #photo.distance = self.haversine(lon1, lat1, lon2, lat2) #add points based number of comments, distance, age order by these
             lat = round(photo.lat, 6)
             lon = round(photo.lon, 6)
