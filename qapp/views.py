@@ -105,8 +105,8 @@ class photosByNewest(APIView):
         photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
         try:
             page = int(request.data['page'])
-            page1 = page * 8
-            first_page = page1 - 8
+            page1 = 0
+            first_page = 1
             maps = False
         except:
             maps = True
@@ -121,7 +121,7 @@ class photosByNewest(APIView):
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
             photos.append(data)
-        if request.data['maps']:
+        if maps:
             t = photos
         else:
             t = photos[first_page:page1]
