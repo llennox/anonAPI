@@ -106,7 +106,7 @@ class photosByNewest(APIView):
             page1 = page * 8
             first_page = page1 - 8
         except:
-            request.data['map'] = True
+            maps = True
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func
             data = {}
@@ -118,7 +118,7 @@ class photosByNewest(APIView):
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
             photos.append(data)
-        if request.data['map']:
+        if maps:
             t = photos
         else:
             t = photos[first_page:page1]
