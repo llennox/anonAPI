@@ -105,8 +105,8 @@ class photosByNewest(APIView):
         photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
         try:
             page = int(request.data['page'])
-            page1 = 0
-            first_page = 1
+            page1 = page * 8
+            first_page = page1 - 8
             maps = False
         except:
             maps = True
