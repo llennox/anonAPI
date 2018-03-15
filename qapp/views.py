@@ -101,10 +101,12 @@ class photosByNewest(APIView):
 
     def post(self, request, format=None):
         photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
-        if request.data['page']:
+        try:
             page = int(request.data['page'])
             page1 = page * 8
             first_page = page1 - 8
+        except:
+            request.data['map'] = True
         photos = []
         for photo in photos1: # do the haversin and attach comments proly a new litt func
             data = {}
