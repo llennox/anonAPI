@@ -5,16 +5,14 @@ from rest_framework import viewsets, status
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.response import Response
 from qapp.models import Photo, Comments, Profile, Flag, Block
-from django.contrib.gis.geoip2 import GeoIP2
 from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from boto.s3.key import Key
 from math import radians, cos, sin, asin, sqrt
-import math, hashlib, sys, random, os, boto, string, datetime
+import math, hashlib, sys, random, os, string, datetime
 from qapp.serializers import PhotoSerializer, CommentsSerializer, UserSerializer, LinkedSerializer
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -30,8 +28,9 @@ from rest_framework.renderers import JSONRenderer
 import json
 from django.conf import settings
 
+
 def main(request):
-    with open('/home/connlloc/sites/q/local_lens/build/index.html') as f:
+    with open('/home/conlloc/local_lens_web/q/local_lens/build/index.html') as f:
         return HttpResponse(f.read())
 
 def terms(request):  ### popup that presents rules.

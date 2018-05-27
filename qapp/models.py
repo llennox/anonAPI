@@ -8,11 +8,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from knox.models import AuthToken
 
-#return created 
+#return created
 class Block(models.Model):
     blocker = models.CharField(max_length=255, default="")
     blockee = models.CharField(max_length=255, default="")
-    
+
 class Flag(models.Model):
     photourl = models.CharField(max_length=255, default="")
     photospecs = models.CharField(max_length=255, default="")
@@ -29,7 +29,7 @@ class Photo(models.Model):
     caption = models.CharField(max_length=255, default="")
     useruuid = models.UUIDField()
     isvideo = models.BooleanField(default=False)
- 
+
     def return_comments(self, blocker_deviceUUID):
         blocks = Block.objects.filter(blocker=blocker_deviceUUID)
         comments = Comments.objects.filter(photouuid=self).order_by('timestamp')
@@ -59,7 +59,7 @@ class Messages(models.Model):
   #      AuthToken.objects.create(user=instance)
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, related_name='profile')
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     isanon = models.BooleanField(default=False)
     bio = models.CharField(max_length=255, default='')
     profileImg = models.CharField(max_length=40, default='')
@@ -68,6 +68,3 @@ class Profile(models.Model):
     created = models.BooleanField(default=False)
     deviceUUID = models.CharField(max_length=255, default='')
     banned = models.BooleanField(default=False)
-
-
-
