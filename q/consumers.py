@@ -10,7 +10,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from knox.models import AuthToken
 from django.contrib.auth.models import User
-from qapp.models import Photo, Comments, Profile, Flag, Block
+from qapp.models import Photo, Comments, Profile, Flag, Block, Client
 
 from knox.settings import CONSTANTS
 import binascii
@@ -52,12 +52,12 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
 
 
     async def connect(self):
-
+        # save the channel here
         await self.accept()
-        
+
 
     async def disconnect(self, code):
-        pass
+        Client.objects.filter(channel_name=self.channel_name).delete()
 
     async def receive_json(self, action):
 
@@ -67,8 +67,11 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
                 token = action['token'].encode('utf-8')
                 user, auth_token = self.authenticate_credentials(token)
                 #user = AuthToken.objects.get(token_key=action['token'])
-                if 'user_search_string' in action:
-                    await self.search_user_string(action['user_search_string'])
+                if user is not None:
+                    profile = Profile.objects.get(user=user)
+                    Client.objects.create(channel_name=self.channel_name, useruuid=profile.uuid)
+                    if 'user_search_string' in action:
+                        await self.search_user_string(action['user_search_string'])
             except Exception as e:
                 await self.send('exception %s' % e)
 

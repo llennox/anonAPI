@@ -47,12 +47,6 @@ class Comments(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     useruuid = models.UUIDField()
 
-class Messages(models.Model):
-    sender = models.CharField(max_length=50, default="anon")
-    date = models.DateTimeField(auto_now_add=True)
-    message = models.CharField(max_length=255, default='')
-    anontoken = models.CharField(max_length=50, default="")
-
 #@receiver(post_save, sender=settings.AUTH_USER_MODEL)
 #def create_auth_token(sender, instance=None, created=False, **kwargs):
   #  if created:
@@ -68,3 +62,16 @@ class Profile(models.Model):
     created = models.BooleanField(default=False)
     deviceUUID = models.CharField(max_length=255, default='')
     banned = models.BooleanField(default=False)
+    channel_name = models.CharField(max_length=255, default=None)
+
+class Room(models.Model):
+    users = models.ManyToManyField(Profile)
+    created = models.DateTimeField(auto_now_add=True)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+class Message(models.Model):
+    sender = models.ForeignKey(Profile, related_name='sender_profile', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    room = models.ForeignKey(Room, related_name='message_room',  on_delete=models.CASCADE)
+    content = models.CharField(max_length=255)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
