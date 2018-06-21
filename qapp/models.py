@@ -62,7 +62,7 @@ class Profile(models.Model):
     created = models.BooleanField(default=False)
     deviceUUID = models.CharField(max_length=255, default='')
     banned = models.BooleanField(default=False)
-    channel_name = models.CharField(max_length=255, default=None)
+    channel_name = models.CharField(max_length=255, default='')
 
 class Room(models.Model):
     users = models.ManyToManyField(Profile)

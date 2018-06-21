@@ -95,12 +95,9 @@ class FlagPhoto(APIView):
         return Response("success", status=status.HTTP_200_OK)
 
 class photosByNewest(APIView):
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+
 
     def post(self, request, format=None):
-        user = request._auth.user
-        profile = Profile.objects.get(user=user)
         photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
         try:
             page = int(request.data['page'])
@@ -116,7 +113,7 @@ class photosByNewest(APIView):
             uuid = photo.uuid
             lat = round(photo.lat, 6)
             lon = round(photo.lon, 6)
-            comments = Photo.return_comments(uuid, profile.deviceUUID)
+            comments = Photo.return_comments(uuid, 'profile.deviceUUID')
             data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid, 'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}

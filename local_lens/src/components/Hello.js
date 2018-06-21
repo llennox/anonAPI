@@ -1,14 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import logo from './../assets/shutter_gif_mayb.gif';
+import myimage from './../assets/myimage.gif';
 import apple from './../assets/apple.png';
 import google from './../assets/googleplay.png';
-import main_view from './../assets/main_view.png';
-import comment_view from './../assets/comment_view.png';
-import account_as_use from './../assets/account_as_use.png';
-import account_as_anon from './../assets/account_as_anon.png';
-import account_logged_out from './../assets/account_logged_out.png';
-import styles from './../assets/styling.css';
+
 
 
 
@@ -55,7 +49,7 @@ const Hello = () => {
        <div>
         <a style={{ marginRight: 30, color: 'white', textDecoration: 'none', fontSize: 30 }} href="https://connellgough.com">contact</a>
       </div>
-      <h1 style={h1Style} >Local lens</h1>
+      <h1 style={h1Style} >geeps</h1>
        </div>
     )
   }
@@ -69,39 +63,19 @@ const Hello = () => {
        <div>
         <a style={{ marginRight: 30, color: 'white', textDecoration: 'none', fontSize: 30 }} href="https://connellgough.com">contact</a>
       </div>
-      <h1 style={h1Style} >Local lens</h1>
-      
+      <h1 style={h1Style} >geeps</h1>
+        <div style={pDivStyle}>
+        <p style={psmallStyle}><a href="https://github.com/llennox/anonAPI">geeps is open source!</a></p>
+        <p style={pStyle}>geeps is an ios and android app and website. Catalogue your adventure for friends and family as well as communicate with other people in your vicinity. You can post anonymously.
+        </p>
+        <p style={psmallStyle}>
+        photograph important places for others who come behind you i.e. gear shops, water sources, resupply points, loose bolts and bears!
+        </p>
+        </div>
 
-      <img src={logo} alt="loading..." />
+      <img style={{marginBottom: '2%'}} src={myimage} alt="loading..." />
 
-      <div style={pDivStyle}>
-      <p style={pStyle}>Local lens is an ios and android app that returns a combination of the closest and newest photos in a scroll view and allows the posting of comments, photos, videos and captions.
-      think of it as tool to catalogue a place and communicate with people in your vicinity. You can post anonymously.
-      </p>
-      <p style={psmallStyle}>
-    Talk about what&#39;s
-      going on in your town with your community, advertise your bussiness, art, or music, arrange meetups, buy and sell stuff, catalogue someplace for the next people who pass through
-      or anything else you can think of. As always Have fun, and be respectful.
-      </p>
-      </div>
-      <div style={{ width: '100%', height: '700px'  }}>
-        <img style={{ width: '25%', marginTop: '1%' }} src={main_view} alt="loading. . ." />
-      </div>
-      <div style={{ width: '100%', height: '700px' }}>
-        <img style={{ width: '25%', marginTop: '1%' }} src={comment_view} alt="loading. . ." />
-      </div>
-      <div style={{ width: '100%', height: '700px'  }}>
-        <img style={{ width: '25%', marginTop: '1%' }} src={account_logged_out} alt="loading. . ." />
-      </div>
-      <div style={{ width: '100%', height: '700px'  }}>
-        <img style={{ width: '25%', marginTop: '1%' }} src={account_as_anon} alt="loading. . ." />
-      </div>
-      <div style={{ width: '100%', height: '700px'  }}>
-        <img style={{ width: '25%', marginTop: '1%' }} src={account_as_use} alt="loading. . ." />
-      </div>
-      <p style={pStyle}>
 
-      </p>
     </div>
   )
 }

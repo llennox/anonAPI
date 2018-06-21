@@ -10,7 +10,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 import json
 from knox.models import AuthToken
 from django.contrib.auth.models import User
-from qapp.models import Photo, Comments, Profile, Flag, Block, Client
+from qapp.models import Photo, Comments, Profile, Flag, Block, Message, Room
 
 from knox.settings import CONSTANTS
 import binascii
@@ -57,10 +57,10 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
 
 
     async def disconnect(self, code):
-        Client.objects.filter(channel_name=self.channel_name).delete()
+        pass
+        #Client.objects.filter(channel_name=self.channel_name).delete()
 
     async def receive_json(self, action):
-
         if 'token' in action:
             try:
                 print(action)
@@ -69,14 +69,17 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
                 #user = AuthToken.objects.get(token_key=action['token'])
                 if user is not None:
                     profile = Profile.objects.get(user=user)
-                    Client.objects.create(channel_name=self.channel_name, useruuid=profile.uuid)
+                    #Client.objects.create(channel_name=self.channel_name, useruuid=profile.uuid)
                     if 'user_search_string' in action:
                         await self.search_user_string(action['user_search_string'])
             except Exception as e:
                 await self.send('exception %s' % e)
+        else:
+            await self.send('token plz, also this is open source please contact me to contribute')
+
 
 
     async def search_user_string(self, user_search_string):
-        users = Profile.objects.filter(user__username__contains=user_search_string, created=True)
-        return_users = {'objects':[{'userUUID': user.uuid, 'username': user.user} for user in users]}
-        await self.send(str(return_users))
+        users = Profile.objects.filter(user__username__contains=user_search_string, created=True)[:15]
+        return_users = {'objects':[{'value': str(user.user), 'label': str(user.user)} for user in users]}
+        await self.send(json.dumps(return_users))

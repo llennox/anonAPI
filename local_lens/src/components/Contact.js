@@ -1,8 +1,8 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import logo from './../assets/shutterLarge.gif';
-import apple from './../assets/apple.png';
-import google from './../assets/googleplay.png';
+//import PropTypes from 'prop-types';
+//import logo from './../assets/shutterLarge.gif';
+//import apple from './../assets/apple.png';
+//import google from './../assets/googleplay.png';
 import me from './../assets/me.png';
 import { Link } from 'react-router-dom';
 

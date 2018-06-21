@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import Hello from './components/Hello';
-import byDistance from './components/byDistance';
-import Contact from './components/Contact';
+import NavBar from './components/NavBar';
+
+import styles from './assets/styling.css';
+import './bootstrap/css/bootstrap.css';
 
 
 class App extends Component {
@@ -9,7 +10,7 @@ class App extends Component {
   render() {
     return (
     <div>
-       <Hello />
+        <NavBar />
     </div>
     );
   }
