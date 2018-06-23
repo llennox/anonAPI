@@ -7,7 +7,10 @@ export const LOADING = 'LOADING';
 export const USER_SEARCH = 'USER_SEARCH';
 export const LOADING_SWITCH = 'LOADING_SWITCH';
 export const UPDATE_CENTER = 'UPDATE_CENTER';
-
+export const USER_SEARCH_ERROR = 'USER_SEARCH_ERROR';
+export const PHOTOS_FOR = 'PHOTOS_FOR';
+export const CLOSE_MODAL = 'CLOSE_MODAL';
+export const OPEN_MODAL = 'OPEN_MODAL';
 
 export const userSearch = (search) => {
   return (dispatch) => {
@@ -29,28 +32,53 @@ export const updateCenter = (center, zoom) => {
   }
 }
 
-export const helloWorld = () => {
-  return {
-    type: HELLO_WORLD
+export const closeModal = () => {
+  return (dispatch) => {
+    dispatch({type: CLOSE_MODAL})
   }
 }
 
-export const reset = () => {
-  return {
-    type: RESET
+export const openModal = (x) => {
+  return (dispatch) => {
+    dispatch({type: OPEN_MODAL, payload: x })
   }
 }
 
-export const photosByNewest = (thePage) => {
+export const photosByNewest = () => {
   return (dispatch) => {
   dispatch({ type: LOADING });
-  axios.defaults.headers.common['Authorization'] = 'd73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44';
+  axios.defaults.headers.common.Authorization = 'Token d73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44';
   axios.defaults.withCredentials = true;
   const url = `http://localhost:8000/api/photos-by-newest/`;
   axios.post(url).then(function (response) {
     console.log(response);
     dispatch({ type: PHOTOS, payload: response.data });
+    dispatch({type: PHOTOS_FOR, payload: 'everyone'})
     dispatch({ type: LOADING_FALSE })
+  });
+  }
+}
+
+export const photosByUser = (x) => {
+  return (dispatch) => {
+  dispatch({ type: LOADING });
+  axios.defaults.headers.common.Authorization = 'Token d73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44';
+  axios.defaults.withCredentials = true;
+  //const url = 'http://httpbin.org/post'
+  const url = `http://localhost:8000/api/photos-by-newest/`;
+  axios.post(url, {
+    username: x
+  }).then(function (response) {
+    console.log(response.data.objects.length);
+    if (response.data.objects.length === 0) {
+      dispatch({ type: USER_SEARCH_ERROR, payload: 'that user has not posted yet'})
+      dispatch({ type: LOADING_FALSE })
+    } else {
+      dispatch({ type: PHOTOS, payload: response.data });
+      dispatch({type: PHOTOS_FOR, payload: x})
+      dispatch({ type: USER_SEARCH_ERROR, payload: ''})
+    dispatch({ type: LOADING_FALSE })
+  }
   });
   }
 }

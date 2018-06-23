@@ -95,10 +95,14 @@ class FlagPhoto(APIView):
         return Response("success", status=status.HTTP_200_OK)
 
 class photosByNewest(APIView):
-
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, format=None):
-        photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
+        try:
+            photos1 = Photo.objects.filter(poster=request.data['username']).order_by('timestamp').reverse()
+        except:
+            photos1 = Photo.objects.filter(visible=True).order_by('timestamp').reverse()
         try:
             page = int(request.data['page'])
             page1 = page * 8

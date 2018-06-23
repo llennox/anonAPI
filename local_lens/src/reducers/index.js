@@ -7,11 +7,25 @@ import {
   PHOTOS,
   USER_SEARCH,
   LOADING_SWITCH,
-  UPDATE_CENTER
+  UPDATE_CENTER,
+  USER_SEARCH_ERROR,
+  PHOTOS_FOR,
+  OPEN_MODAL,
+  CLOSE_MODAL
 } from './../actions';
 
 
-let initialState = { center: [48.750906, -122.480607], message: 'Hello', photos: { 'objects': [] }, loading: true, userList: [{label: "conlloc", value: "conlloc"}] }
+let initialState = {
+  singlePhoto: {},
+  modalState: false,
+  mapLoading: false,
+  photosForUsername: 'everyone',
+  userSearchError: '' ,
+  center: [48.750906, -122.480607],
+  message: 'Hello',
+  photos: { 'objects': [] },
+  loading: true,
+  userList: [{label: "connell-gough", value: "connell-gough"}] }
 
 const helloWorld = (state=initialState, action) => {
   switch (action.type) {
@@ -25,9 +39,9 @@ const helloWorld = (state=initialState, action) => {
     case RESET:
     	return state = initialState
     case LOADING:
-      return {...state, loading: true }
+      return {...state, mapLoading: true }
     case LOADING_FALSE:
-      return {...state, loading: false }
+      return {...state, mapLoading: false }
     case PHOTOS:
       const x = action.payload.objects
       const first = x[0]
@@ -35,6 +49,14 @@ const helloWorld = (state=initialState, action) => {
     case UPDATE_CENTER:
       console.log(action.payload)
       return {...state, center: action.payload }
+    case USER_SEARCH_ERROR:
+      return {...state, userSearchError: action.payload}
+    case PHOTOS_FOR:
+      return {...state, photosForUsername: action.payload}
+    case CLOSE_MODAL:
+      return {...state, modalState: false }
+    case OPEN_MODAL:
+      return {...state, modalState: true, singlePhoto: action.payload }
     default:
       return state
   }
