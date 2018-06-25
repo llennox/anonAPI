@@ -13,7 +13,7 @@ class PhotoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Photo
 
-        fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid', 'isvideo')
+        fields = ('uuid', 'lat', 'lon', 'poster','timestamp', 'visible', 'caption','useruuid', 'isvideo', 'isText')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -34,10 +34,3 @@ class LinkedSerializer(serializers.Serializer):
     useruuid = serializers.UUIDField()
     photo_distance=serializers.FloatField()
     comments = CommentsSerializer(many=True)
-
-
-    
-
-
-
-

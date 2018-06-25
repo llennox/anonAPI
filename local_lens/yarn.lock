@@ -5644,9 +5644,9 @@ react-modal@^3.4.5:
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
 
-react-moment@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/react-moment/-/react-moment-0.7.0.tgz#9ccb5c87be683d08c253b48469167443f09c3d89"
+react-moment@^0.7.7:
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/react-moment/-/react-moment-0.7.7.tgz#b509bd903de1c984d54c4c5d54bd5bfd007490a6"
 
 react-overlays@^0.8.0:
   version "0.8.3"

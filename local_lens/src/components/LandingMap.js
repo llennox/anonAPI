@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Map from 'pigeon-maps';
 import Marker from 'pigeon-marker';
 import { connect } from 'react-redux';
-import { photosByNewest, updateCenter, openModal } from '../actions';
+import { photosByNewest, updateCenter, changePhoto } from '../actions';
 import logo from './../assets/shutter_gif_mayb.gif';
 
 // please change this if you take some code from here.
@@ -52,11 +52,7 @@ class LandingMap extends Component {
   handleBoundsChange = ({ center, zoom, bounds, initial }) => {
     if (initial) {
       this.setState({center: this.props.center})
-      console.log('Got initial bounds: ', bounds)
     }
-    console.log('zoom ##################', zoom)
-    console.log('center ============>>>>>>>>>>', center)
-    console.log('bounds =============>>>>>>>>>', bounds)
     this.setState({ zoom, center })
     this.props.updateCenter(center)
   }
@@ -82,8 +78,8 @@ class LandingMap extends Component {
                zoomOnMouseWheel={zoomOnMouseWheel}
                width={width}
                height={window.innerHeight - 50}>
-            {x.map((photo) =>
-              <Marker key={photo.uuid} anchor={[photo.lat, photo.lon]} payload={1} onClick={() => this.props.openModal(photo)} />
+            {x.map((photo, i) =>
+              <Marker key={photo.uuid} anchor={[photo.lat, photo.lon]} payload={1} onClick={() => this.props.changePhoto(i, this.props.photos)} />
             )}
           </Map>
         </div>
@@ -111,5 +107,5 @@ return {
 export default connect(mapStateToProps, {
  photosByNewest,
  updateCenter,
- openModal
+ changePhoto
 })(LandingMap);

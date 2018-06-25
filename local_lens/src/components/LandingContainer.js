@@ -3,9 +3,8 @@ import { connect } from 'react-redux';
 import LandingMap from './LandingMap'
 import SymbolSelect from './SymbolSelect';
 import ModalView from './ModalView';
-import Modal from 'react-modal';
 import { photosByNewest, updateCenter, closeModal } from '../actions';
-import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
 
 
 class MapView extends Component {

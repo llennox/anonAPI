@@ -11,12 +11,19 @@ export const USER_SEARCH_ERROR = 'USER_SEARCH_ERROR';
 export const PHOTOS_FOR = 'PHOTOS_FOR';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const OPEN_MODAL = 'OPEN_MODAL';
+export const MODAL_POINTER = 'MODAL_POINTER';
+
 
 export const userSearch = (search) => {
   return (dispatch) => {
-    console.log('here', search);
     dispatch({type: USER_SEARCH, payload: search});
 
+  }
+}
+
+export const changePhoto = (i, photos) => {
+  return (dispatch) => {
+    dispatch({type: MODAL_POINTER, payload: i})
   }
 }
 
@@ -38,11 +45,6 @@ export const closeModal = () => {
   }
 }
 
-export const openModal = (x) => {
-  return (dispatch) => {
-    dispatch({type: OPEN_MODAL, payload: x })
-  }
-}
 
 export const photosByNewest = () => {
   return (dispatch) => {
@@ -52,6 +54,7 @@ export const photosByNewest = () => {
   const url = `http://localhost:8000/api/photos-by-newest/`;
   axios.post(url).then(function (response) {
     console.log(response);
+    dispatch({type: USER_SEARCH_ERROR, payload: ''})
     dispatch({ type: PHOTOS, payload: response.data });
     dispatch({type: PHOTOS_FOR, payload: 'everyone'})
     dispatch({ type: LOADING_FALSE })

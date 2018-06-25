@@ -10,8 +10,8 @@ import {
   UPDATE_CENTER,
   USER_SEARCH_ERROR,
   PHOTOS_FOR,
-  OPEN_MODAL,
-  CLOSE_MODAL
+  CLOSE_MODAL,
+  MODAL_POINTER
 } from './../actions';
 
 
@@ -25,7 +25,9 @@ let initialState = {
   message: 'Hello',
   photos: { 'objects': [] },
   loading: true,
-  userList: [{label: "connell-gough", value: "connell-gough"}] }
+  userList: [{label: "connell-gough", value: "connell-gough"}],
+  modalPointer: 0
+}
 
 const helloWorld = (state=initialState, action) => {
   switch (action.type) {
@@ -47,7 +49,6 @@ const helloWorld = (state=initialState, action) => {
       const first = x[0]
       return {...state, photos: action.payload, center: [first.lat, first.lon] }
     case UPDATE_CENTER:
-      console.log(action.payload)
       return {...state, center: action.payload }
     case USER_SEARCH_ERROR:
       return {...state, userSearchError: action.payload}
@@ -55,8 +56,8 @@ const helloWorld = (state=initialState, action) => {
       return {...state, photosForUsername: action.payload}
     case CLOSE_MODAL:
       return {...state, modalState: false }
-    case OPEN_MODAL:
-      return {...state, modalState: true, singlePhoto: action.payload }
+    case MODAL_POINTER:
+      return {...state, modalPointer: action.payload, modalState: true}
     default:
       return state
   }

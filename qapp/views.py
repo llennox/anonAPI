@@ -119,7 +119,7 @@ class photosByNewest(APIView):
             lon = round(photo.lon, 6)
             comments = Photo.return_comments(uuid, 'profile.deviceUUID')
             data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
-'caption':photo.caption,'useruuid':photo.useruuid, 'photo_distance': 'n/a',\
+'caption':photo.caption,'useruuid':photo.useruuid,'isText':photo.isText, 'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
             photos.append(data)
@@ -322,7 +322,7 @@ class ReturnUserPhotos(APIView):
             uuid = photo.uuid
             comments = Photo.return_comments(uuid, profile.deviceUUID)
             data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
-'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
+'caption':photo.caption,'useruuid':photo.useruuid,'isText':photo.isText,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
             photos.append(data)
@@ -373,7 +373,7 @@ class UserViewSet(APIView):  # need to make a
                     lon = round(photo.lon, 6)
                     uuid = photo.uuid
                     comments = Photo.return_comments(uuid, profile.deviceUUID)
-                    data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                    data={'uuid':photo.uuid,'lat':lat, 'isText':photo.isText, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
@@ -386,7 +386,7 @@ class UserViewSet(APIView):  # need to make a
             photo = Photo.objects.get(uuid=args[0])
             uuid = args[0]
             comments = Photo.return_comments(uuid, profile.deviceUUID)
-            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+            data={'uuid':photo.uuid,'lat':photo.lat,'lon':photo.lon,'isvideo':photo.isvideo, 'isText':photo.isText,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance': 'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
             return Response(data, status=status.HTTP_202_ACCEPTED, headers={'Content-Type': 'application/json'})
@@ -406,7 +406,7 @@ class UserViewSet(APIView):  # need to make a
 
                 uuid = photo.uuid
                 comments = Photo.return_comments(uuid, profile.deviceUUID)
-                data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
+                data={'uuid':photo.uuid,'lat':lat, 'photo_distance': photo.distance, 'isText':photo.isText,'lon':lon,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':'n/a',\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
@@ -550,7 +550,7 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
                 lon = round(photo.lon, 6)
                 uuid = photo.uuid
                 comments = Photo.return_comments(uuid, profile.deviceUUID)
-                data={'uuid':photo.uuid,'lat':lat,'lon':lon,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
+                data={'uuid':photo.uuid,'lat':lat,'lon':lon, 'isText':photo.isText,'isvideo':photo.isvideo,'poster':photo.poster,'timestamp':photo.timestamp,\
 'caption':photo.caption,'useruuid':photo.useruuid,'photo_distance':photo.distance,\
 'comments':[{'photouuid':com.photouuid,'comments':com.comment,'poster':com.poster,'timestamp':com.timestamp,'uuid':com.uuid,'useruuid':com.useruuid} for com in comments]}
 
@@ -631,11 +631,20 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             request.data['isvideo'] = True
         else:
             request.data['isvideo'] = False
+        if request.data['isText'] == 'True':
+            request.data['isText'] = True
+            serializer = PhotoSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                data = serializer.data
+                return Response(data, status=status.HTTP_201_CREATED)
+            else:
+                return Response("data sent is not valid for isText post", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            request.data['isText'] = False
         request.data['visible'] = True
-        #self.roundgps('lon' ,request)
-        #self.roundgps('lat' ,request)
+
         serializer = PhotoSerializer(data=request.data)
-        print(serializer.initial_data)
         if serializer.is_valid(): # save info to model then send to amazon, if fail delete photo
             serializer.save()
             uuid = serializer.data['uuid']

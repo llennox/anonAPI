@@ -29,6 +29,7 @@ class Photo(models.Model):
     caption = models.CharField(max_length=255, default="")
     useruuid = models.UUIDField()
     isvideo = models.BooleanField(default=False)
+    isText = models.BooleanField(default=False)
 
     def return_comments(self, blocker_deviceUUID):
         blocks = Block.objects.filter(blocker=blocker_deviceUUID)
