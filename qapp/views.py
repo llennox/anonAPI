@@ -27,6 +27,7 @@ import uuid
 from rest_framework.renderers import JSONRenderer
 import json
 from django.conf import settings
+from PIL import Image, ExifTags
 
 
 def main(request):
@@ -653,10 +654,28 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             try:
                 if request.data['isvideo'] == True:
                     destination=open('/home/connlloc/sites/q/photos/%s.mp4' % uuid, 'wb+')
+                    filepath='/home/connlloc/sites/q/photos/%s.mp4' % uuid
                     photo = '%s' % uuid
                     for chunk in f.chunks():
                         destination.write(chunk) ####delete this later writes photos to memory
                     destination.close()
+                    try:
+                        image=Image.open(filepath)
+                        for orientation in ExifTags.TAGS.keys():
+                            if ExifTags.TAGS[orientation]=='Orientation':
+                                break
+                        exif=dict(image._getexif().items())
+
+                        if exif[orientation] == 3:
+                            image=image.rotate(180, expand=True)
+                        elif exif[orientation] == 6:
+                            image=image.rotate(270, expand=True)
+                        elif exif[orientation] == 8:
+                            image=image.rotate(90, expand=True)
+                        image.save(filepath)
+                        image.close()
+                    except (AttributeError, KeyError, IndexError):
+                        pass
                 elif request.data['isvideo'] == False:
                     destination=open('/home/connlloc/sites/q/photos/%s.jpg' % uuid, 'wb+')
                     photo = '%s' % uuid

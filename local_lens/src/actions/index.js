@@ -23,9 +23,12 @@ export const userSearch = (search) => {
 
 export const changePhoto = (i, photos) => {
   return (dispatch) => {
+
     dispatch({type: MODAL_POINTER, payload: i})
   }
 }
+
+
 
 export const loadingSwitch = (x) => {
   return (dispatch) => {

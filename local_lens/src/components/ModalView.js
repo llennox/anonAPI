@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
-import ExifOrientationImg from 'react-exif-orientation-img';
 import { photosByNewest, updateCenter, closeModal, changePhoto } from '../actions';
 import { Grid, Row, Col, Button, Modal } from 'react-bootstrap';
 import Moment from 'react-moment';
+import Img from 'react-image';
+import { Dots } from 'react-activity';
+import 'react-activity/dist/react-activity.css';
 
 
 class ModalView extends Component {
@@ -13,6 +14,7 @@ class ModalView extends Component {
       super();
       this.closeModal = this.closeModal.bind(this);
     }
+
 
   closeModal() {
     this.props.closeModal()
@@ -62,10 +64,11 @@ renderPhoto () {
       <p style={{fontWeight: 'bold', fontSize: '120%'}}>{this.props.photos.objects[this.props.modalPointer].caption}</p><br/>
       <Moment style={{fontWeight: 'bold', fontSize: '80%'}} fromNow>{this.props.photos.objects[this.props.modalPointer].timestamp}</Moment><br/>
       <p style={{fontWeight: 'bold', fontSize: '80%'}}>{this.props.photos.objects[this.props.modalPointer].lat}, {this.props.photos.objects[this.props.modalPointer].lon}</p>
-      <ExifOrientationImg
-            src={`https://locallensapp.com/photos/${this.props.photos.objects[this.props.modalPointer].uuid}.jpg`}
-            alt=""
-            style={{display: 'block', marginRight:'auto', marginLeft:'auto',maxWidth: window.innerWidth/2.7, maxHeight: 'auto'}}
+      <Img
+            src={[`https://locallensapp.com/photos/${this.props.photos.objects[this.props.modalPointer].uuid}.jpg`]}
+            loader={<Dots />}
+            style={{display: 'block', marginRight:'auto', marginLeft:'auto',maxWidth: '100%', maxHeight: 'auto'}}
+
       />
     </div>
     )
@@ -100,7 +103,7 @@ renderPhoto () {
       <div>
       <p style={{fontWeight: 'bold', fontSize: '80%'}}>comments</p>
       {comments.map((comment, i) =>
-      <div>
+      <div key={i}>
         <br/>
         <p style={{overflowWrap: 'break-word'}} key={i}>{comment.poster} <br/> {comment.comments}<br/><Moment style={{fontWeight: 'bold', fontSize: '80%'}} fromNow>{comment.timestamp}</Moment><br/></p>
 
