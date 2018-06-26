@@ -5,6 +5,7 @@
   "homepage": "https://locallensapp.com",
   "dependencies": {
     "axios": "^0.18.0",
+    "blueimp-load-image": "^2.19.0",
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
     "pigeon-maps": "^0.9.3",

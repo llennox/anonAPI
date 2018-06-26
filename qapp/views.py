@@ -27,6 +27,7 @@ import uuid
 from rest_framework.renderers import JSONRenderer
 import json
 from django.conf import settings
+from PIL import Image, ExifTags
 
 
 def main(request):
