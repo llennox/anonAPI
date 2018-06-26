@@ -57,7 +57,7 @@ const helloWorld = (state=initialState, action) => {
     case CLOSE_MODAL:
       return {...state, modalState: false }
     case MODAL_POINTER:
-      return {...state, modalPointer: action.payload, modalState: true}
+      return Object.assign({}, state, {modalPointer: action.payload, modalState: true})
     default:
       return state
   }

@@ -30,7 +30,7 @@ from django.conf import settings
 
 
 def main(request):
-    with open('/home/conlloc/local_lens_web/q/local_lens/build/index.html') as f:
+    with open('/home/connlloc/sites/q/local_lens/build/index.html') as f:
         return HttpResponse(f.read())
 
 def terms(request):  ### popup that presents rules.

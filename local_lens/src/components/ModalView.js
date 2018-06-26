@@ -65,7 +65,7 @@ renderPhoto () {
       <ExifOrientationImg
             src={`https://locallensapp.com/photos/${this.props.photos.objects[this.props.modalPointer].uuid}.jpg`}
             alt=""
-            style={{display: 'block', marginRight:'auto', marginLeft:'auto',maxWidth: '100%', maxHeight: 'auto'}}
+            style={{display: 'block', marginRight:'auto', marginLeft:'auto',maxWidth: window.innerWidth/2.7, maxHeight: 'auto'}}
       />
     </div>
     )
@@ -93,7 +93,7 @@ renderPhoto () {
         <Modal.Body style={{height: window.innerHeight - 100}}>
 
   <Row className="show-grid">
-    <Col xs={4} md={4} lg={4}>
+    <Col xs={6} md={4} lg={4}>
     {this.renderPhoto()}
     </Col>
     <Col xs={6} md={5} lg={5}>
@@ -108,7 +108,7 @@ renderPhoto () {
      )}
      </div>
     </Col>
-      <Col xs={2} md={3} lg={3}></Col>
+      <Col xs={0} md={3} lg={3}></Col>
   </Row>
 
 
