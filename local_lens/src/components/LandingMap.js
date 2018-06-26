@@ -28,9 +28,16 @@ class LandingMap extends Component {
       center: this.props.center,
       zoom: 13,
       provider: 'outdoors',
-      zoomOnMouseWheel: true
+      zoomOnMouseWheel: true,
+      pointer: this.props.modalPointer
     }
 
+  }
+
+  componentDidUpdate() {
+    if (this.state.pointer !== this.props.modalPointer && this.props.modalState !== true) {
+      this.setState({ center: this.props.center, pointer: this.props.modalPointer })
+    }
   }
 
   componentWillMount() {
@@ -64,8 +71,7 @@ class LandingMap extends Component {
   render () {
 
     if (this.props.mapLoading === false) {
-      const x = this.props.photos.objects
-
+      const x = this.props.photos.objects;
       const { center, zoom, provider, zoomOnMouseWheel } = this.state
       const width = window.innerWidth - (window.innerWidth * 0.1)
       return (
@@ -100,7 +106,9 @@ return {
   loading: state.def.loading,
   center: state.def.center,
   zoom: state.def.zoom,
-  mapLoading: state.def.mapLoading
+  mapLoading: state.def.mapLoading,
+  modalPointer: state.def.modalPointer,
+  modalState: state.def.modalState
  };
 };
 
