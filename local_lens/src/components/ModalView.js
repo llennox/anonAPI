@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import { photosByNewest, updateCenter, closeModal, changePhoto } from '../actions';
 import { Grid, Row, Col, Button, Modal } from 'react-bootstrap';
 import Moment from 'react-moment';
+import Img from 'react-image';
+import { Dots } from 'react-activity';
+import 'react-activity/dist/react-activity.css';
 
 
 class ModalView extends Component {
@@ -61,10 +64,9 @@ renderPhoto () {
       <p style={{fontWeight: 'bold', fontSize: '120%'}}>{this.props.photos.objects[this.props.modalPointer].caption}</p><br/>
       <Moment style={{fontWeight: 'bold', fontSize: '80%'}} fromNow>{this.props.photos.objects[this.props.modalPointer].timestamp}</Moment><br/>
       <p style={{fontWeight: 'bold', fontSize: '80%'}}>{this.props.photos.objects[this.props.modalPointer].lat}, {this.props.photos.objects[this.props.modalPointer].lon}</p>
-      <img
-            src={`https://locallensapp.com/photos/${this.props.photos.objects[this.props.modalPointer].uuid}.jpg`}
-            alt=""
-            onLoad={() => console.log('I loaded')}
+      <Img
+            src={[`https://locallensapp.com/photos/${this.props.photos.objects[this.props.modalPointer].uuid}.jpg`]}
+            loader={<Dots />}
             style={{display: 'block', marginRight:'auto', marginLeft:'auto',maxWidth: '100%', maxHeight: 'auto'}}
       />
     </div>
