@@ -84,7 +84,7 @@ renderPhoto () {
     <div>
       <Modal
         show={this.props.modalState}
-        onHide={this.closeModal}
+        onHide={() => this.props.closeModal(this.props.photos, this.props.modalPointer)}
         bsSize="large"
         aria-labelledby="contained-modal-title-lg"
       >

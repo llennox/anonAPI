@@ -14,7 +14,7 @@ class SymbolSelect extends Component {
   this.state = {searchValue: ''};
   this.searchChange = this.searchChange.bind(this);
   this.handleClear = this.handleClear.bind(this);
-  this.ws = new Sockette('ws://localhost:8000/updates/', {
+  this.ws = new Sockette('wss://locallensapp.com/updates/', {
     timeout: 1000,
     maxAttempts: 10,
     onopen: e => this.props.loadingSwitch(false),

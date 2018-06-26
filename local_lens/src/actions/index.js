@@ -23,7 +23,6 @@ export const userSearch = (search) => {
 
 export const changePhoto = (i, photos) => {
   return (dispatch) => {
-
     dispatch({type: MODAL_POINTER, payload: i})
   }
 }
@@ -42,8 +41,9 @@ export const updateCenter = (center, zoom) => {
   }
 }
 
-export const closeModal = () => {
+export const closeModal = (photos, i) => {
   return (dispatch) => {
+    dispatch({type: UPDATE_CENTER, payload: [photos.objects[i].lat, photos.objects[i].lon] });
     dispatch({type: CLOSE_MODAL})
   }
 }
@@ -54,7 +54,8 @@ export const photosByNewest = () => {
   dispatch({ type: LOADING });
   axios.defaults.headers.common.Authorization = 'Token d73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44';
   axios.defaults.withCredentials = true;
-  const url = `http://localhost:8000/api/photos-by-newest/`;
+  //const url = `http://localhost:8000/api/photos-by-newest/`;
+  const url = `https://locallensapp.com/api/photos-by-newest/`;
   axios.post(url).then(function (response) {
     console.log(response);
     dispatch({type: USER_SEARCH_ERROR, payload: ''})
@@ -71,7 +72,8 @@ export const photosByUser = (x) => {
   axios.defaults.headers.common.Authorization = 'Token d73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44';
   axios.defaults.withCredentials = true;
   //const url = 'http://httpbin.org/post'
-  const url = `http://localhost:8000/api/photos-by-newest/`;
+  //const url = `http://localhost:8000/api/photos-by-newest/`;
+  const url = `https://locallensapp.com/api/photos-by-newest/`;
   axios.post(url, {
     username: x
   }).then(function (response) {
