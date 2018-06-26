@@ -1,7 +1,7 @@
 from PIL import Image, ExifTags
 import os
 
-for file in os.listdir('/home/connlloc/sites/q/photos/')
+for file in os.listdir('/home/connlloc/sites/q/photos/'):
     try:
         filepath='/home/connlloc/sites/q/photos/%s' % file
         image=Image.open(filepath)

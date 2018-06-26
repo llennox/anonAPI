@@ -632,16 +632,19 @@ class PhotoViewSet(APIView):  #need to issue tokens for anon users and logged in
             request.data['isvideo'] = True
         else:
             request.data['isvideo'] = False
-        if request.data['isText'] == 'True':
-            request.data['isText'] = True
-            serializer = PhotoSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                data = serializer.data
-                return Response(data, status=status.HTTP_201_CREATED)
+        try:
+            if request.data['isText'] == 'True':
+                request.data['isText'] = True
+                serializer = PhotoSerializer(data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    data = serializer.data
+                    return Response(data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response("data sent is not valid for isText post", status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response("data sent is not valid for isText post", status=status.HTTP_400_BAD_REQUEST)
-        else:
+                request.data['isText'] = False
+        except:
             request.data['isText'] = False
         request.data['visible'] = True
 
