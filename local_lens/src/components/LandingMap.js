@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Map from 'pigeon-maps';
 import Marker from 'pigeon-marker';
 import { connect } from 'react-redux';
-import { photosByNewest, updateCenter, changePhoto } from '../actions';
+import { photosByNewest, updateCenter, changePhoto, getAuthToken } from '../actions';
 import logo from './../assets/shutter_gif_mayb.gif';
 
 // please change this if you take some code from here.
@@ -31,17 +31,22 @@ class LandingMap extends Component {
       zoomOnMouseWheel: true,
       pointer: this.props.modalPointer
     }
-
   }
+
+  componentWillMount() {
+    if (localStorage.getItem('token') === null) {
+    this.props.getAuthToken();
+  } else {
+    this.props.photosByNewest();
+  }
+  }
+
+
 
   componentDidUpdate() {
     if (this.state.pointer !== this.props.modalPointer && this.props.modalState !== true) {
       this.setState({ center: this.props.center, pointer: this.props.modalPointer })
     }
-  }
-
-  componentWillMount() {
-    this.props.photosByNewest();
   }
 
   zoomIn = () => {
@@ -115,5 +120,6 @@ return {
 export default connect(mapStateToProps, {
  photosByNewest,
  updateCenter,
- changePhoto
+ changePhoto,
+ getAuthToken
 })(LandingMap);

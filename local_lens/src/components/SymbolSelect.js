@@ -7,6 +7,14 @@ import { photosByNewest, userSearch, loadingSwitch, photosByUser } from '../acti
 import Sockette from 'sockette';
 import { Button } from 'react-bootstrap';
 
+let BASE_URL = process.env.BASE_URL
+
+if (process.env.NODE_ENV === 'production') {
+  BASE_URL = 'wss://locallensapp.com/updates/'
+} else {
+  BASE_URL = 'ws://localhost:8000/updates/'
+}
+
 class SymbolSelect extends Component {
 
   constructor(props) {
@@ -14,7 +22,8 @@ class SymbolSelect extends Component {
   this.state = {searchValue: ''};
   this.searchChange = this.searchChange.bind(this);
   this.handleClear = this.handleClear.bind(this);
-  this.ws = new Sockette('wss://locallensapp.com/updates/', {
+  //const websocket = 'wss://locallensapp.com/updates/'
+  this.ws = new Sockette(`${BASE_URL}`, {
     timeout: 1000,
     maxAttempts: 10,
     onopen: e => this.props.loadingSwitch(false),
@@ -28,7 +37,8 @@ class SymbolSelect extends Component {
 }
 
 searchChange(value, event) {
-  this.ws.json({'user_search_string': value, 'token': 'd28fe2e37bd3adc6dca2cd024b80a30a8782bcfa3bb9e130101973007ad6a921'});
+  //this.ws.json({'user_search_string': value, 'token': 'd28fe2e37bd3adc6dca2cd024b80a30a8782bcfa3bb9e130101973007ad6a921'});
+  this.ws.json({'user_search_string': value, 'token': 'd73fb67a67988f204fdaf0524247dc38083e750e267b620e9660c5b215e8fe44'});
 }
 
 handleClear () {

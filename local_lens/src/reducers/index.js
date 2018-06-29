@@ -11,7 +11,8 @@ import {
   USER_SEARCH_ERROR,
   PHOTOS_FOR,
   CLOSE_MODAL,
-  MODAL_POINTER
+  MODAL_POINTER,
+   CHANGE_STATE_LILO_MODAL
 } from './../actions';
 
 
@@ -26,7 +27,8 @@ let initialState = {
   photos: { 'objects': [] },
   loading: true,
   userList: [{label: "connell-gough", value: "connell-gough"}],
-  modalPointer: 0
+  modalPointer: 0,
+  liloModalState: false
 }
 
 const helloWorld = (state=initialState, action) => {
@@ -34,7 +36,7 @@ const helloWorld = (state=initialState, action) => {
     case LOADING_SWITCH:
       return {...state, loading: action.payload}
     case USER_SEARCH:
-      const obj = JSON.parse(action.payload)
+      const obj = JSON.parse(action.payload);
       return {...state, userList: obj.objects }
     case HELLO_WORLD:
       return Object.assign({}, state, { message: 'Hello, World!' })
@@ -51,11 +53,14 @@ const helloWorld = (state=initialState, action) => {
     case UPDATE_CENTER:
       return {...state, center: action.payload }
     case USER_SEARCH_ERROR:
-      return {...state, userSearchError: action.payload}
+      return {...state, userSearchError: action.payload }
     case PHOTOS_FOR:
-      return {...state, photosForUsername: action.payload}
+      return {...state, photosForUsername: action.payload }
     case CLOSE_MODAL:
       return {...state, modalState: false }
+    case CHANGE_STATE_LILO_MODAL:
+      console.log(action.payload)
+      return {...state, liloModalState: action.payload }
     case MODAL_POINTER:
       return Object.assign({}, state, {modalPointer: action.payload, modalState: true})
     default:

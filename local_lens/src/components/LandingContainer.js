@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import LandingMap from './LandingMap'
 import SymbolSelect from './SymbolSelect';
 import ModalView from './ModalView';
+import LiloModal from './liloModal';
 import { photosByNewest, updateCenter, closeModal } from '../actions';
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -10,7 +11,7 @@ import { Grid, Row, Col } from 'react-bootstrap';
 class MapView extends Component {
 
   constructor() {
-      super();
+      super()
       this.closeModal = this.closeModal.bind(this);
     }
 
@@ -31,6 +32,7 @@ class MapView extends Component {
       </Row>
       </Grid>
       <ModalView />
+      <LiloModal />
         <LandingMap />
 
     </div>
