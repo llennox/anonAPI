@@ -5,7 +5,7 @@ import SymbolSelect from './SymbolSelect';
 import ModalView from './ModalView';
 import LoginModal from './auth/loginModal';
 import RegisterModal from './auth/register';
-import logoutModal from './auth/logoutModal';
+import LogoutModal from './auth/logoutModal';
 import { photosByNewest, updateCenter, closeModal } from '../actions';
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -34,7 +34,7 @@ class MapView extends Component {
       </Row>
       </Grid>
       <ModalView />
-      <LogouModal />
+      <LogoutModal />
       <LoginModal />
       <RegisterModal />
         <LandingMap />

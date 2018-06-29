@@ -40,7 +40,7 @@ export const changePhoto = (i, photos) => {
 
 export const authModalChangeState = (string) => {
   return (dispatch) => {
-    dispath({type: AUTH_MODAL_CHANGE_STATE, payload: string })
+    dispatch({type: AUTH_MODAL_CHANGE_STATE, payload: string })
   }
 }
 
@@ -55,13 +55,6 @@ export const updateCenter = (center, zoom) => {
     dispatch({type: UPDATE_CENTER, payload: center });
   }
 }
-
-export const liloModalChangeState = (io) => {
-  return (dispatch) => {
-    dispatch({type: CHANGE_STATE_LILO_MODAL, payload: io})
-  }
-}
-
 
 export const closeModal = (photos, i) => {
   return (dispatch) => {

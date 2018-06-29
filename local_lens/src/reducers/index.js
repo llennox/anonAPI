@@ -12,7 +12,7 @@ import {
   PHOTOS_FOR,
   CLOSE_MODAL,
   MODAL_POINTER,
-   CHANGE_STATE_LILO_MODAL
+  AUTH_MODAL_CHANGE_STATE
 } from './../actions';
 
 
