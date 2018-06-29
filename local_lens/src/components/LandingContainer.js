@@ -3,7 +3,9 @@ import { connect } from 'react-redux';
 import LandingMap from './LandingMap'
 import SymbolSelect from './SymbolSelect';
 import ModalView from './ModalView';
-import LiloModal from './liloModal';
+import LoginModal from './auth/loginModal';
+import RegisterModal from './auth/register';
+import logoutModal from './auth/logoutModal';
 import { photosByNewest, updateCenter, closeModal } from '../actions';
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -32,7 +34,9 @@ class MapView extends Component {
       </Row>
       </Grid>
       <ModalView />
-      <LiloModal />
+      <LogouModal />
+      <LoginModal />
+      <RegisterModal />
         <LandingMap />
 
     </div>

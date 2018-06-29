@@ -28,7 +28,9 @@ let initialState = {
   loading: true,
   userList: [{label: "connell-gough", value: "connell-gough"}],
   modalPointer: 0,
-  liloModalState: false
+  loginModalState: false,
+  logoutModalState: false,
+  registerModalState: false
 }
 
 const helloWorld = (state=initialState, action) => {
@@ -58,7 +60,16 @@ const helloWorld = (state=initialState, action) => {
       return {...state, photosForUsername: action.payload }
     case CLOSE_MODAL:
       return {...state, modalState: false }
-    case CHANGE_STATE_LILO_MODAL:
+    case AUTH_MODAL_CHANGE_STATE:
+      if (action.payload === 'login') {
+        return {...state, loginModalState: true, logoutModalState: false, registerModalState: false }
+      } else if (action.payload === 'register') {
+        return {...state, loginModalState: false, logoutModalState: false, registerModalState: true }
+      } else if (action.payload === 'logout') {
+        return {...state, loginModalState: false, logoutModalState: true, registerModalState: false }
+      } else {
+        return state
+      }
       console.log(action.payload)
       return {...state, liloModalState: action.payload }
     case MODAL_POINTER:

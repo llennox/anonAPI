@@ -94,7 +94,6 @@ renderPhoto () {
         </Modal.Header>
         <Grid>
         <Modal.Body style={{height: window.innerHeight - 100}}>
-
   <Row className="show-grid">
     <Col xs={6} md={4} lg={4}>
     {this.renderPhoto()}
@@ -118,10 +117,6 @@ renderPhoto () {
         </Modal.Body>
 </Grid>
       </Modal>
-
-
-
-
     </div>
     );
   }

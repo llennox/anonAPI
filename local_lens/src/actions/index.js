@@ -13,7 +13,8 @@ export const PHOTOS_FOR = 'PHOTOS_FOR';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const OPEN_MODAL = 'OPEN_MODAL';
 export const MODAL_POINTER = 'MODAL_POINTER';
-export const  CHANGE_STATE_LILO_MODAL = ' CHANGE_STATE_LILO_MODAL';
+export const  AUTH_MODAL_CHANGE_STATE = 'AUTH_MODAL_CHANGE_STATE';
+
 
 let BASE_URL = process.env.BASE_URL
 
@@ -37,7 +38,11 @@ export const changePhoto = (i, photos) => {
   }
 }
 
-
+export const authModalChangeState = (string) => {
+  return (dispatch) => {
+    dispath({type: AUTH_MODAL_CHANGE_STATE, payload: string })
+  }
+}
 
 export const loadingSwitch = (x) => {
   return (dispatch) => {

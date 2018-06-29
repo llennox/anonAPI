@@ -6,7 +6,7 @@ import {
   Switch,
   Route
 } from 'react-router-dom';
-import { liloModalChangeState } from '../actions'
+import { authModalChangeState } from '../actions'
 import { Navbar, Nav, NavItem, Button } from 'react-bootstrap';
 import apple from './../assets/apple.png';
 import google from './../assets/googleplay.png';
@@ -39,7 +39,7 @@ class NavBar extends Component {
     </Nav>
     <Nav pullRight>
       <NavItem>
-        <Button bsStyle='link' onClick={() => this.props.liloModalChangeState(true) }>
+        <Button bsStyle='link' onClick={() => this.props.authModalChangeState('logout') }>
             logout
         </Button>
 
@@ -79,8 +79,13 @@ return (
   </Nav>
   <Nav pullRight>
     <NavItem>
-      <Button bsStyle='link' onClick={() => this.props.liloModalChangeState(true) }>
-      register/login
+      <Button bsStyle='link' onClick={() => this.props.authModalChangeState('login') }>
+      login
+    </Button>
+    </NavItem>
+    <NavItem>
+      <Button bsStyle='link' onClick={() => this.props.authModalChangeState('register') }>
+      register
     </Button>
     </NavItem>
   </Nav>
@@ -111,5 +116,5 @@ return {
 };
 
 export default connect(mapStateToProps, {
-    liloModalChangeState
+    authModalChangeState
 })(NavBar);
